@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:thing_finder/database/database.dart';
-import 'package:thing_finder/screen/containers_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:thing_finder/screen/main_menu_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +18,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Thing Finder',
-        home: const ContainersScreen(),
+        home: const MainMenuScreen()
       ),
     );
   }
