@@ -36,9 +36,12 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   Widget build(BuildContext context) {
     appDatabase = Provider.of<AppDatabase>(context);
 
-    appDatabase.getContainer(widget.dbItemCompanion.container.value ?? 0).then((value) => setState(() {
-      currentContainer = value;
-    }));
+    // TODO this needs to handle nulls ie when an item isn't in a container
+    appDatabase
+        .getContainer(widget.dbItemCompanion.container.value ?? 0)
+        .then((value) => setState(() {
+              currentContainer = value;
+            }));
 
     return Scaffold(
       appBar: _getDetailAppBar(),
@@ -101,6 +104,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   ),
                   hintText: 'Item Description'),
             ),
+
+            // TODO these need to conditionally render only to show on item detail
             Text("Current container title: " + currentContainer.title),
             Text("Current container id: " + currentContainer.id.toString()),
           ],
@@ -122,7 +127,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       elevation: 16,
       style: TextStyle(color: Colors.deepPurple),
       onChanged: (DbContainerData? newValue) {
-        selectedContainer = newValue?.id;
+        // TODO make null work with item's selected container
+        selectedContainer = newValue?.id ?? 0;
       },
       items: containerList.map((DbContainerData container) {
         return DropdownMenuItem<DbContainerData>(
@@ -191,7 +197,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   }
 
   void _saveToDb() {
-    // todo remove this 'if' since separate screens exist
+    // TODO for container in either saves below need to allow nulls
     if (widget.dbItemCompanion.id.present) {
       appDatabase
           .updateItem(DbItemData(
@@ -200,6 +206,17 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               description: descriptionEditingController.text,
               date: DateFormat.yMMMd().format(DateTime.now()),
               container: selectedContainer ?? 0))
+          .then((value) {
+        Navigator.pop(context, true);
+      });
+    } else {
+      appDatabase
+          .createItem(DbItemCompanion(
+        title: dr.Value(titleEditingController.text),
+        description: dr.Value(descriptionEditingController.text),
+        date: dr.Value(DateFormat.yMMMd().format(DateTime.now())),
+        container: dr.Value(selectedContainer),
+      ))
           .then((value) {
         Navigator.pop(context, true);
       });

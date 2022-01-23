@@ -4,7 +4,6 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/screen/item_detail_screen.dart';
-import 'package:thing_finder/screen/item_create_screen.dart';
 
 class ItemsScreen extends StatefulWidget {
   const ItemsScreen({Key? key}) : super(key: key);
@@ -158,7 +157,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
     var res = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ItemCreateScreen(
+        builder: (context) => ItemDetailScreen(
           title: title,
           dbItemCompanion: dbItemCompanion,
         ),
