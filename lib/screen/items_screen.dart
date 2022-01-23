@@ -3,39 +3,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
-import 'package:thing_finder/screen/container_detail_screen.dart';
+import 'package:thing_finder/screen/item_detail_screen.dart';
+import 'package:thing_finder/screen/item_create_screen.dart';
 
-class ContainersScreen extends StatefulWidget {
-  const ContainersScreen({Key? key}) : super(key: key);
+class ItemsScreen extends StatefulWidget {
+  const ItemsScreen({Key? key}) : super(key: key);
 
   @override
-  _ContainersScreenState createState() => _ContainersScreenState();
+  _ItemsScreenState createState() => _ItemsScreenState();
 }
 
-class _ContainersScreenState extends State<ContainersScreen> {
+class _ItemsScreenState extends State<ItemsScreen> {
   late AppDatabase database;
   int axisCount = 2;
   @override
   Widget build(BuildContext context) {
     database = Provider.of<AppDatabase>(context);
     return Scaffold(
-      appBar: _getContainersAppBar(),
-      body: FutureBuilder<List<DbContainerData>>(
-        future: _getContainersFromDatabase(),
+      appBar: _getItemsAppBar(),
+      body: FutureBuilder<List<DbItemData>>(
+        future: _getItemsFromDatabase(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            List<DbContainerData>? containerList = snapshot.data;
-            if (containerList != null) {
-              if (containerList.isEmpty) {
+            List<DbItemData>? itemList = snapshot.data;
+            if (itemList != null) {
+              if (itemList.isEmpty) {
                 return Center(
                   child: Text(
-                    'No containers found; click on add button to create one.',
+                    'No items found; click on add button to create one.',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyText2,
                   ),
                 );
               } else {
-                return containerListUI(containerList);
+                return itemListUI(itemList);
               }
             }
           } else if (snapshot.hasError) {
@@ -47,7 +48,7 @@ class _ContainersScreenState extends State<ContainersScreen> {
           }
           return Center(
             child: Text(
-              'Click on add button to create new container',
+              'Click on add button to create new item',
               style: Theme.of(context).textTheme.bodyText2,
             ),
           );
@@ -55,9 +56,9 @@ class _ContainersScreenState extends State<ContainersScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _navigateToDetail(
-              'Add Container',
-              const DbContainerCompanion(
+          _navigateToCreate(
+              'Add Item',
+              const DbItemCompanion(
                   title: dr.Value(''),
                   description: dr.Value('')));
         },
@@ -73,24 +74,25 @@ class _ContainersScreenState extends State<ContainersScreen> {
     );
   }
 
-  Future<List<DbContainerData>> _getContainersFromDatabase() async {
-    return await database.getAllContainers();
+  Future<List<DbItemData>> _getItemsFromDatabase() async {
+    return await database.getAllItems();
   }
 
-  Widget containerListUI(List<DbContainerData> containerList) {
+  Widget itemListUI(List<DbItemData> itemList) {
     return StaggeredGridView.countBuilder(
-      itemCount: containerList.length,
+      itemCount: itemList.length,
       crossAxisCount: 4,
       itemBuilder: (context, index) {
-        DbContainerData dbContainerData = containerList[index];
+        DbItemData dbItemData = itemList[index];
         return InkWell(
           onTap: () {
             _navigateToDetail(
-              'Edit Container',
-              DbContainerCompanion(
-                  id: dr.Value(dbContainerData.id),
-                  title: dr.Value(dbContainerData.title),
-                  description: dr.Value(dbContainerData.description)),
+              'Edit Item',
+              DbItemCompanion(
+                  id: dr.Value(dbItemData.id),
+                  title: dr.Value(dbItemData.title),
+                  description: dr.Value(dbItemData.description),
+                  container: dr.Value(dbItemData.container)),
             );
           },
           child: Container(
@@ -107,21 +109,21 @@ class _ContainersScreenState extends State<ContainersScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        dbContainerData.title,
+                        dbItemData.title,
                         style: Theme.of(context).textTheme.bodyText2,
                       ),
                     )
                   ],
                 ),
                 Text(
-                  dbContainerData.description,
+                  dbItemData.description,
                   style: Theme.of(context).textTheme.bodyText1,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      dbContainerData.date,
+                      dbItemData.date,
                       style: Theme.of(context).textTheme.subtitle2,
                     )
                   ],
@@ -137,13 +139,13 @@ class _ContainersScreenState extends State<ContainersScreen> {
     );
   }
 
-  _navigateToDetail(String title, DbContainerCompanion dbContainerCompanion) async {
+  _navigateToDetail(String title, DbItemCompanion dbItemCompanion) async {
     var res = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ContainerDetailScreen(
+        builder: (context) => ItemDetailScreen(
           title: title,
-          dbContainerCompanion: dbContainerCompanion,
+          dbItemCompanion: dbItemCompanion,
         ),
       ),
     );
@@ -152,13 +154,28 @@ class _ContainersScreenState extends State<ContainersScreen> {
     }
   }
 
-  _getContainersAppBar() {
+  _navigateToCreate(String title, DbItemCompanion dbItemCompanion) async {
+    var res = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ItemCreateScreen(
+          title: title,
+          dbItemCompanion: dbItemCompanion,
+        ),
+      ),
+    );
+    if (res != null && res == true) {
+      setState(() {});
+    }
+  }
+
+  _getItemsAppBar() {
     return AppBar(
       backgroundColor: Colors.white,
       centerTitle: true,
       elevation: 0,
       title: Text(
-        'Containers',
+        'Items',
         style: Theme.of(context).textTheme.headline5,
       ),
       actions: [

@@ -19,6 +19,7 @@ class DbItem extends Table {
   IntColumn get container => integer().nullable().references(DbContainer, #id)();
   TextColumn get title => text()();
   TextColumn get description => text().named('description')();
+  TextColumn get date => text()();
 }
 
 LazyDatabase _openConnection() {
@@ -36,6 +37,10 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   int get schemaVersion => 1;
+
+  /* ---------------------------------------------------------------------------
+   * Containers
+   * -------------------------------------------------------------------------*/
 
   // create new container
   Future<int> createContainer(DbContainerCompanion dbContainerCompanion) async {
@@ -55,5 +60,33 @@ class AppDatabase extends _$AppDatabase {
   // delete container
   Future<int> deleteContainer(DbContainerData dbContainerData) async {
     return await delete(dbContainer).delete(dbContainerData);
+  }
+
+  Future<DbContainerData> getContainer(int containerId) async {
+    return await (select(dbContainer)..where((tbl) => tbl.id.equals(containerId))).getSingle();
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Items
+   * -------------------------------------------------------------------------*/
+
+  // create new item
+  Future<int> createItem(DbItemCompanion dbItemCompanion) async {
+    return await into(dbItem).insert(dbItemCompanion);
+  }
+
+  // retrieve all items
+  Future<List<DbItemData>> getAllItems() async {
+    return await select(dbItem).get();
+  }
+
+  // update item
+  Future<bool> updateItem(DbItemData dbItemData) async {
+    return await update(dbItem).replace(dbItemData);
+  }
+
+  // delete item
+  Future<int> deleteItem(DbItemData dbItemData) async {
+    return await delete(dbItem).delete(dbItemData);
   }
 }
