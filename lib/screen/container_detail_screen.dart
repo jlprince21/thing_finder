@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class ContainerDetailScreen extends StatefulWidget {
   final String title;
@@ -17,6 +18,7 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
   late AppDatabase appDatabase;
   late TextEditingController titleEditingController;
   late TextEditingController descriptionEditingController;
+
   @override
   void initState() {
     titleEditingController = TextEditingController();
@@ -107,6 +109,7 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
       appDatabase
           .updateContainer(DbContainerData(
               id: widget.dbContainerCompanion.id.value,
+              uniqueId: widget.dbContainerCompanion.uniqueId.value,
               title: titleEditingController.text,
               description: descriptionEditingController.text,
               date: DateFormat.yMMMd().format(DateTime.now())))
@@ -114,8 +117,12 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
         Navigator.pop(context, true);
       });
     } else {
+      var uuid = Uuid();
+      var id = uuid.v4();
+
       appDatabase
           .createContainer(DbContainerCompanion(
+              uniqueId: dr.Value(id),
               title: dr.Value(titleEditingController.text),
               description: dr.Value(descriptionEditingController.text),
               date: dr.Value(DateFormat.yMMMd().format(DateTime.now()))))
@@ -145,6 +152,7 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
                 appDatabase
                     .deleteContainer(DbContainerData(
                         id: widget.dbContainerCompanion.id.value,
+                        uniqueId: widget.dbContainerCompanion.uniqueId.value,
                         title: widget.dbContainerCompanion.title.value,
                         description: widget.dbContainerCompanion.description.value,
                         date: DateFormat.yMMMd().format(DateTime.now())))

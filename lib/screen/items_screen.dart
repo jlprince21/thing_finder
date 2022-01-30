@@ -89,6 +89,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
               'Edit Item',
               DbItemCompanion(
                   id: dr.Value(dbItemData.id),
+                  uniqueId: dr.Value(dbItemData.uniqueId),
                   title: dr.Value(dbItemData.title),
                   description: dr.Value(dbItemData.description),
                   container: dr.Value(dbItemData.container)),

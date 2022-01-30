@@ -9,6 +9,7 @@ part 'database.g.dart';
 
 class DbContainer extends Table {
   IntColumn get id => integer().autoIncrement()();
+  TextColumn get uniqueId => text()();
   TextColumn get title => text()();
   TextColumn get description => text().named('description')();
   TextColumn get date => text()();
@@ -16,7 +17,8 @@ class DbContainer extends Table {
 
 class DbItem extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get container => integer().nullable().references(DbContainer, #id)();
+  TextColumn get uniqueId => text()();
+  IntColumn get container => integer().nullable().references(DbContainer, #uniqueId)();
   TextColumn get title => text()();
   TextColumn get description => text().named('description')();
   TextColumn get date => text()();

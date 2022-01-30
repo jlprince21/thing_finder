@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class ItemDetailScreen extends StatefulWidget {
   final String title;
@@ -27,7 +28,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     descriptionEditingController = TextEditingController();
     titleEditingController.text = widget.dbItemCompanion.title.value;
     descriptionEditingController.text = widget.dbItemCompanion.description.value;
-    currentContainer = new DbContainerData(id: 0, date: "2022-01-01", description: "placeholder description", title: "placeholder title");
+    currentContainer = new DbContainerData(id: 0, uniqueId: "", date: "2022-01-01", description: "placeholder description", title: "placeholder title");
 
     super.initState();
   }
@@ -108,6 +109,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             // TODO these need to conditionally render only to show on item detail
             Text("Current container title: " + currentContainer.title),
             Text("Current container id: " + currentContainer.id.toString()),
+            Text("Current container uuid: " + currentContainer.uniqueId.toString()),
           ],
         ),
       ),
@@ -202,6 +204,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       appDatabase
           .updateItem(DbItemData(
               id: widget.dbItemCompanion.id.value,
+              uniqueId: widget.dbItemCompanion.uniqueId.value,
               title: titleEditingController.text,
               description: descriptionEditingController.text,
               date: DateFormat.yMMMd().format(DateTime.now()),
@@ -210,12 +213,16 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         Navigator.pop(context, true);
       });
     } else {
+      var uuid = Uuid();
+      var id = uuid.v4();
+
       appDatabase
           .createItem(DbItemCompanion(
-        title: dr.Value(titleEditingController.text),
-        description: dr.Value(descriptionEditingController.text),
-        date: dr.Value(DateFormat.yMMMd().format(DateTime.now())),
-        container: dr.Value(selectedContainer),
+            uniqueId: dr.Value(id),
+            title: dr.Value(titleEditingController.text),
+            description: dr.Value(descriptionEditingController.text),
+            date: dr.Value(DateFormat.yMMMd().format(DateTime.now())),
+            container: dr.Value(selectedContainer),
       ))
           .then((value) {
         Navigator.pop(context, true);
@@ -243,6 +250,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 appDatabase
                     .deleteItem(DbItemData(
                         id: widget.dbItemCompanion.id.value,
+                        uniqueId: widget.dbItemCompanion.uniqueId.value,
                         title: widget.dbItemCompanion.title.value,
                         description: widget.dbItemCompanion.description.value,
                         date: DateFormat.yMMMd().format(DateTime.now()),
