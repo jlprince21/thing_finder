@@ -88,7 +88,6 @@ class _ContainersScreenState extends State<ContainersScreen> {
             _navigateToDetail(
               'Edit Container',
               DbContainerCompanion(
-                  id: dr.Value(dbContainerData.id),
                   uniqueId: dr.Value(dbContainerData.uniqueId),
                   title: dr.Value(dbContainerData.title),
                   description: dr.Value(dbContainerData.description)),

@@ -8,14 +8,12 @@ part of 'database.dart';
 
 // ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
 class DbContainerData extends DataClass implements Insertable<DbContainerData> {
-  final int id;
   final String uniqueId;
   final String title;
   final String description;
   final String date;
   DbContainerData(
-      {required this.id,
-      required this.uniqueId,
+      {required this.uniqueId,
       required this.title,
       required this.description,
       required this.date});
@@ -23,8 +21,6 @@ class DbContainerData extends DataClass implements Insertable<DbContainerData> {
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return DbContainerData(
-      id: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
       uniqueId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}unique_id'])!,
       title: const StringType()
@@ -38,7 +34,6 @@ class DbContainerData extends DataClass implements Insertable<DbContainerData> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
     map['unique_id'] = Variable<String>(uniqueId);
     map['title'] = Variable<String>(title);
     map['description'] = Variable<String>(description);
@@ -48,7 +43,6 @@ class DbContainerData extends DataClass implements Insertable<DbContainerData> {
 
   DbContainerCompanion toCompanion(bool nullToAbsent) {
     return DbContainerCompanion(
-      id: Value(id),
       uniqueId: Value(uniqueId),
       title: Value(title),
       description: Value(description),
@@ -60,7 +54,6 @@ class DbContainerData extends DataClass implements Insertable<DbContainerData> {
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DbContainerData(
-      id: serializer.fromJson<int>(json['id']),
       uniqueId: serializer.fromJson<String>(json['uniqueId']),
       title: serializer.fromJson<String>(json['title']),
       description: serializer.fromJson<String>(json['description']),
@@ -71,7 +64,6 @@ class DbContainerData extends DataClass implements Insertable<DbContainerData> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
       'uniqueId': serializer.toJson<String>(uniqueId),
       'title': serializer.toJson<String>(title),
       'description': serializer.toJson<String>(description),
@@ -80,13 +72,11 @@ class DbContainerData extends DataClass implements Insertable<DbContainerData> {
   }
 
   DbContainerData copyWith(
-          {int? id,
-          String? uniqueId,
+          {String? uniqueId,
           String? title,
           String? description,
           String? date}) =>
       DbContainerData(
-        id: id ?? this.id,
         uniqueId: uniqueId ?? this.uniqueId,
         title: title ?? this.title,
         description: description ?? this.description,
@@ -95,7 +85,6 @@ class DbContainerData extends DataClass implements Insertable<DbContainerData> {
   @override
   String toString() {
     return (StringBuffer('DbContainerData(')
-          ..write('id: $id, ')
           ..write('uniqueId: $uniqueId, ')
           ..write('title: $title, ')
           ..write('description: $description, ')
@@ -105,12 +94,11 @@ class DbContainerData extends DataClass implements Insertable<DbContainerData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, uniqueId, title, description, date);
+  int get hashCode => Object.hash(uniqueId, title, description, date);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is DbContainerData &&
-          other.id == this.id &&
           other.uniqueId == this.uniqueId &&
           other.title == this.title &&
           other.description == this.description &&
@@ -118,20 +106,17 @@ class DbContainerData extends DataClass implements Insertable<DbContainerData> {
 }
 
 class DbContainerCompanion extends UpdateCompanion<DbContainerData> {
-  final Value<int> id;
   final Value<String> uniqueId;
   final Value<String> title;
   final Value<String> description;
   final Value<String> date;
   const DbContainerCompanion({
-    this.id = const Value.absent(),
     this.uniqueId = const Value.absent(),
     this.title = const Value.absent(),
     this.description = const Value.absent(),
     this.date = const Value.absent(),
   });
   DbContainerCompanion.insert({
-    this.id = const Value.absent(),
     required String uniqueId,
     required String title,
     required String description,
@@ -141,14 +126,12 @@ class DbContainerCompanion extends UpdateCompanion<DbContainerData> {
         description = Value(description),
         date = Value(date);
   static Insertable<DbContainerData> custom({
-    Expression<int>? id,
     Expression<String>? uniqueId,
     Expression<String>? title,
     Expression<String>? description,
     Expression<String>? date,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
       if (uniqueId != null) 'unique_id': uniqueId,
       if (title != null) 'title': title,
       if (description != null) 'description': description,
@@ -157,13 +140,11 @@ class DbContainerCompanion extends UpdateCompanion<DbContainerData> {
   }
 
   DbContainerCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? uniqueId,
+      {Value<String>? uniqueId,
       Value<String>? title,
       Value<String>? description,
       Value<String>? date}) {
     return DbContainerCompanion(
-      id: id ?? this.id,
       uniqueId: uniqueId ?? this.uniqueId,
       title: title ?? this.title,
       description: description ?? this.description,
@@ -174,9 +155,6 @@ class DbContainerCompanion extends UpdateCompanion<DbContainerData> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
     if (uniqueId.present) {
       map['unique_id'] = Variable<String>(uniqueId.value);
     }
@@ -195,7 +173,6 @@ class DbContainerCompanion extends UpdateCompanion<DbContainerData> {
   @override
   String toString() {
     return (StringBuffer('DbContainerCompanion(')
-          ..write('id: $id, ')
           ..write('uniqueId: $uniqueId, ')
           ..write('title: $title, ')
           ..write('description: $description, ')
@@ -210,13 +187,6 @@ class $DbContainerTable extends DbContainer
   final GeneratedDatabase _db;
   final String? _alias;
   $DbContainerTable(this._db, [this._alias]);
-  final VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
-      'id', aliasedName, false,
-      type: const IntType(),
-      requiredDuringInsert: false,
-      defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
   final VerificationMeta _uniqueIdMeta = const VerificationMeta('uniqueId');
   @override
   late final GeneratedColumn<String?> uniqueId = GeneratedColumn<String?>(
@@ -239,8 +209,7 @@ class $DbContainerTable extends DbContainer
       'date', aliasedName, false,
       type: const StringType(), requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, uniqueId, title, description, date];
+  List<GeneratedColumn> get $columns => [uniqueId, title, description, date];
   @override
   String get aliasedName => _alias ?? 'db_container';
   @override
@@ -250,9 +219,6 @@ class $DbContainerTable extends DbContainer
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
     if (data.containsKey('unique_id')) {
       context.handle(_uniqueIdMeta,
           uniqueId.isAcceptableOrUnknown(data['unique_id']!, _uniqueIdMeta));
@@ -283,7 +249,7 @@ class $DbContainerTable extends DbContainer
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => {uniqueId};
   @override
   DbContainerData map(Map<String, dynamic> data, {String? tablePrefix}) {
     return DbContainerData.fromData(data,
@@ -297,15 +263,13 @@ class $DbContainerTable extends DbContainer
 }
 
 class DbItemData extends DataClass implements Insertable<DbItemData> {
-  final int id;
   final String uniqueId;
-  final int? container;
+  final String? container;
   final String title;
   final String description;
   final String date;
   DbItemData(
-      {required this.id,
-      required this.uniqueId,
+      {required this.uniqueId,
       this.container,
       required this.title,
       required this.description,
@@ -313,11 +277,9 @@ class DbItemData extends DataClass implements Insertable<DbItemData> {
   factory DbItemData.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return DbItemData(
-      id: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
       uniqueId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}unique_id'])!,
-      container: const IntType()
+      container: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}container']),
       title: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}title'])!,
@@ -330,10 +292,9 @@ class DbItemData extends DataClass implements Insertable<DbItemData> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
     map['unique_id'] = Variable<String>(uniqueId);
     if (!nullToAbsent || container != null) {
-      map['container'] = Variable<int?>(container);
+      map['container'] = Variable<String?>(container);
     }
     map['title'] = Variable<String>(title);
     map['description'] = Variable<String>(description);
@@ -343,7 +304,6 @@ class DbItemData extends DataClass implements Insertable<DbItemData> {
 
   DbItemCompanion toCompanion(bool nullToAbsent) {
     return DbItemCompanion(
-      id: Value(id),
       uniqueId: Value(uniqueId),
       container: container == null && nullToAbsent
           ? const Value.absent()
@@ -358,9 +318,8 @@ class DbItemData extends DataClass implements Insertable<DbItemData> {
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DbItemData(
-      id: serializer.fromJson<int>(json['id']),
       uniqueId: serializer.fromJson<String>(json['uniqueId']),
-      container: serializer.fromJson<int?>(json['container']),
+      container: serializer.fromJson<String?>(json['container']),
       title: serializer.fromJson<String>(json['title']),
       description: serializer.fromJson<String>(json['description']),
       date: serializer.fromJson<String>(json['date']),
@@ -370,9 +329,8 @@ class DbItemData extends DataClass implements Insertable<DbItemData> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
       'uniqueId': serializer.toJson<String>(uniqueId),
-      'container': serializer.toJson<int?>(container),
+      'container': serializer.toJson<String?>(container),
       'title': serializer.toJson<String>(title),
       'description': serializer.toJson<String>(description),
       'date': serializer.toJson<String>(date),
@@ -380,14 +338,12 @@ class DbItemData extends DataClass implements Insertable<DbItemData> {
   }
 
   DbItemData copyWith(
-          {int? id,
-          String? uniqueId,
-          int? container,
+          {String? uniqueId,
+          String? container,
           String? title,
           String? description,
           String? date}) =>
       DbItemData(
-        id: id ?? this.id,
         uniqueId: uniqueId ?? this.uniqueId,
         container: container ?? this.container,
         title: title ?? this.title,
@@ -397,7 +353,6 @@ class DbItemData extends DataClass implements Insertable<DbItemData> {
   @override
   String toString() {
     return (StringBuffer('DbItemData(')
-          ..write('id: $id, ')
           ..write('uniqueId: $uniqueId, ')
           ..write('container: $container, ')
           ..write('title: $title, ')
@@ -409,12 +364,11 @@ class DbItemData extends DataClass implements Insertable<DbItemData> {
 
   @override
   int get hashCode =>
-      Object.hash(id, uniqueId, container, title, description, date);
+      Object.hash(uniqueId, container, title, description, date);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is DbItemData &&
-          other.id == this.id &&
           other.uniqueId == this.uniqueId &&
           other.container == this.container &&
           other.title == this.title &&
@@ -423,14 +377,12 @@ class DbItemData extends DataClass implements Insertable<DbItemData> {
 }
 
 class DbItemCompanion extends UpdateCompanion<DbItemData> {
-  final Value<int> id;
   final Value<String> uniqueId;
-  final Value<int?> container;
+  final Value<String?> container;
   final Value<String> title;
   final Value<String> description;
   final Value<String> date;
   const DbItemCompanion({
-    this.id = const Value.absent(),
     this.uniqueId = const Value.absent(),
     this.container = const Value.absent(),
     this.title = const Value.absent(),
@@ -438,7 +390,6 @@ class DbItemCompanion extends UpdateCompanion<DbItemData> {
     this.date = const Value.absent(),
   });
   DbItemCompanion.insert({
-    this.id = const Value.absent(),
     required String uniqueId,
     this.container = const Value.absent(),
     required String title,
@@ -449,15 +400,13 @@ class DbItemCompanion extends UpdateCompanion<DbItemData> {
         description = Value(description),
         date = Value(date);
   static Insertable<DbItemData> custom({
-    Expression<int>? id,
     Expression<String>? uniqueId,
-    Expression<int?>? container,
+    Expression<String?>? container,
     Expression<String>? title,
     Expression<String>? description,
     Expression<String>? date,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
       if (uniqueId != null) 'unique_id': uniqueId,
       if (container != null) 'container': container,
       if (title != null) 'title': title,
@@ -467,14 +416,12 @@ class DbItemCompanion extends UpdateCompanion<DbItemData> {
   }
 
   DbItemCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? uniqueId,
-      Value<int?>? container,
+      {Value<String>? uniqueId,
+      Value<String?>? container,
       Value<String>? title,
       Value<String>? description,
       Value<String>? date}) {
     return DbItemCompanion(
-      id: id ?? this.id,
       uniqueId: uniqueId ?? this.uniqueId,
       container: container ?? this.container,
       title: title ?? this.title,
@@ -486,14 +433,11 @@ class DbItemCompanion extends UpdateCompanion<DbItemData> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
     if (uniqueId.present) {
       map['unique_id'] = Variable<String>(uniqueId.value);
     }
     if (container.present) {
-      map['container'] = Variable<int?>(container.value);
+      map['container'] = Variable<String?>(container.value);
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
@@ -510,7 +454,6 @@ class DbItemCompanion extends UpdateCompanion<DbItemData> {
   @override
   String toString() {
     return (StringBuffer('DbItemCompanion(')
-          ..write('id: $id, ')
           ..write('uniqueId: $uniqueId, ')
           ..write('container: $container, ')
           ..write('title: $title, ')
@@ -525,13 +468,6 @@ class $DbItemTable extends DbItem with TableInfo<$DbItemTable, DbItemData> {
   final GeneratedDatabase _db;
   final String? _alias;
   $DbItemTable(this._db, [this._alias]);
-  final VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
-      'id', aliasedName, false,
-      type: const IntType(),
-      requiredDuringInsert: false,
-      defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
   final VerificationMeta _uniqueIdMeta = const VerificationMeta('uniqueId');
   @override
   late final GeneratedColumn<String?> uniqueId = GeneratedColumn<String?>(
@@ -539,9 +475,9 @@ class $DbItemTable extends DbItem with TableInfo<$DbItemTable, DbItemData> {
       type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _containerMeta = const VerificationMeta('container');
   @override
-  late final GeneratedColumn<int?> container = GeneratedColumn<int?>(
+  late final GeneratedColumn<String?> container = GeneratedColumn<String?>(
       'container', aliasedName, true,
-      type: const IntType(),
+      type: const StringType(),
       requiredDuringInsert: false,
       defaultConstraints: 'REFERENCES db_container (unique_id)');
   final VerificationMeta _titleMeta = const VerificationMeta('title');
@@ -562,7 +498,7 @@ class $DbItemTable extends DbItem with TableInfo<$DbItemTable, DbItemData> {
       type: const StringType(), requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, uniqueId, container, title, description, date];
+      [uniqueId, container, title, description, date];
   @override
   String get aliasedName => _alias ?? 'db_item';
   @override
@@ -572,9 +508,6 @@ class $DbItemTable extends DbItem with TableInfo<$DbItemTable, DbItemData> {
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
     if (data.containsKey('unique_id')) {
       context.handle(_uniqueIdMeta,
           uniqueId.isAcceptableOrUnknown(data['unique_id']!, _uniqueIdMeta));
@@ -609,7 +542,7 @@ class $DbItemTable extends DbItem with TableInfo<$DbItemTable, DbItemData> {
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => {uniqueId};
   @override
   DbItemData map(Map<String, dynamic> data, {String? tablePrefix}) {
     return DbItemData.fromData(data,

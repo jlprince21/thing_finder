@@ -19,7 +19,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   late AppDatabase appDatabase;
   late TextEditingController titleEditingController;
   late TextEditingController descriptionEditingController;
-  late int? selectedContainer;
+  late String? selectedContainer;
   late DbContainerData currentContainer;
 
   @override
@@ -28,7 +28,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     descriptionEditingController = TextEditingController();
     titleEditingController.text = widget.dbItemCompanion.title.value;
     descriptionEditingController.text = widget.dbItemCompanion.description.value;
-    currentContainer = new DbContainerData(id: 0, uniqueId: "", date: "2022-01-01", description: "placeholder description", title: "placeholder title");
+    currentContainer = new DbContainerData(uniqueId: "", date: "2022-01-01", description: "placeholder description", title: "placeholder title");
 
     super.initState();
   }
@@ -39,7 +39,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
     // TODO this needs to handle nulls ie when an item isn't in a container
     appDatabase
-        .getContainer(widget.dbItemCompanion.container.value ?? 0)
+        .getContainer(widget.dbItemCompanion.container.value ?? "")
         .then((value) => setState(() {
               currentContainer = value;
             }));
@@ -108,7 +108,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
             // TODO these need to conditionally render only to show on item detail
             Text("Current container title: " + currentContainer.title),
-            Text("Current container id: " + currentContainer.id.toString()),
             Text("Current container uuid: " + currentContainer.uniqueId.toString()),
           ],
         ),
@@ -130,7 +129,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       style: TextStyle(color: Colors.deepPurple),
       onChanged: (DbContainerData? newValue) {
         // TODO make null work with item's selected container
-        selectedContainer = newValue?.id ?? 0;
+        selectedContainer = newValue?.uniqueId ?? "";
       },
       items: containerList.map((DbContainerData container) {
         return DropdownMenuItem<DbContainerData>(
@@ -194,21 +193,20 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     return await appDatabase.getAllContainers();
   }
 
-  Future<DbContainerData> _getContainerFromDatabase(int id) async {
+  Future<DbContainerData> _getContainerFromDatabase(String id) async {
     return await appDatabase.getContainer(id);
   }
 
   void _saveToDb() {
     // TODO for container in either saves below need to allow nulls
-    if (widget.dbItemCompanion.id.present) {
+    if (widget.dbItemCompanion.uniqueId.present) {
       appDatabase
           .updateItem(DbItemData(
-              id: widget.dbItemCompanion.id.value,
               uniqueId: widget.dbItemCompanion.uniqueId.value,
               title: titleEditingController.text,
               description: descriptionEditingController.text,
               date: DateFormat.yMMMd().format(DateTime.now()),
-              container: selectedContainer ?? 0))
+              container: selectedContainer ?? null))
           .then((value) {
         Navigator.pop(context, true);
       });
@@ -249,7 +247,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 Navigator.pop(context);
                 appDatabase
                     .deleteItem(DbItemData(
-                        id: widget.dbItemCompanion.id.value,
                         uniqueId: widget.dbItemCompanion.uniqueId.value,
                         title: widget.dbItemCompanion.title.value,
                         description: widget.dbItemCompanion.description.value,

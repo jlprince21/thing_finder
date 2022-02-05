@@ -8,20 +8,24 @@ import 'package:path/path.dart' as p;
 part 'database.g.dart';
 
 class DbContainer extends Table {
-  IntColumn get id => integer().autoIncrement()();
   TextColumn get uniqueId => text()();
   TextColumn get title => text()();
   TextColumn get description => text().named('description')();
   TextColumn get date => text()();
+
+  @override
+  Set<Column> get primaryKey => {uniqueId};
 }
 
 class DbItem extends Table {
-  IntColumn get id => integer().autoIncrement()();
   TextColumn get uniqueId => text()();
-  IntColumn get container => integer().nullable().references(DbContainer, #uniqueId)();
+  TextColumn get container => text().nullable().references(DbContainer, #uniqueId)();
   TextColumn get title => text()();
   TextColumn get description => text().named('description')();
   TextColumn get date => text()();
+
+  @override
+  Set<Column> get primaryKey => {uniqueId};
 }
 
 LazyDatabase _openConnection() {
@@ -64,8 +68,8 @@ class AppDatabase extends _$AppDatabase {
     return await delete(dbContainer).delete(dbContainerData);
   }
 
-  Future<DbContainerData> getContainer(int containerId) async {
-    return await (select(dbContainer)..where((tbl) => tbl.id.equals(containerId))).getSingle();
+  Future<DbContainerData> getContainer(String containerId) async {
+    return await (select(dbContainer)..where((tbl) => tbl.uniqueId.equals(containerId))).getSingle();
   }
 
   /* ---------------------------------------------------------------------------

@@ -88,7 +88,6 @@ class _ItemsScreenState extends State<ItemsScreen> {
             _navigateToDetail(
               'Edit Item',
               DbItemCompanion(
-                  id: dr.Value(dbItemData.id),
                   uniqueId: dr.Value(dbItemData.uniqueId),
                   title: dr.Value(dbItemData.title),
                   description: dr.Value(dbItemData.description),

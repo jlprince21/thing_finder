@@ -105,10 +105,9 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
   }
 
   void _saveToDb() {
-    if (widget.dbContainerCompanion.id.present) {
+    if (widget.dbContainerCompanion.uniqueId.present) {
       appDatabase
           .updateContainer(DbContainerData(
-              id: widget.dbContainerCompanion.id.value,
               uniqueId: widget.dbContainerCompanion.uniqueId.value,
               title: titleEditingController.text,
               description: descriptionEditingController.text,
@@ -151,7 +150,6 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
                 Navigator.pop(context);
                 appDatabase
                     .deleteContainer(DbContainerData(
-                        id: widget.dbContainerCompanion.id.value,
                         uniqueId: widget.dbContainerCompanion.uniqueId.value,
                         title: widget.dbContainerCompanion.title.value,
                         description: widget.dbContainerCompanion.description.value,
