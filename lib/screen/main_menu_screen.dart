@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:thing_finder/screen/containers_screen.dart';
 import 'package:thing_finder/screen/items_screen.dart';
+import 'package:thing_finder/screen/search_screen.dart';
 
 class MainMenuScreen extends StatefulWidget {
   const MainMenuScreen({Key? key}) : super(key: key);
@@ -28,7 +29,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                   child: ElevatedButton(
                     child: Text('Items'),
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => ItemsScreen()));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ItemsScreen(searchText: "")));
                     },
                   ),
                 ),
@@ -39,7 +40,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                   child: ElevatedButton(
                     child: Text('Containers'),
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => ContainersScreen()));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ContainersScreen(searchText: "")));
                     },
                   ),
                 ),
@@ -55,7 +56,17 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                   ),
                 ),
               ),
-
+            Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    child: Text('Search'),
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => SearchScreen()));
+                    },
+                  ),
+                ),
+              ),
             ],
           ),
         ),

@@ -6,7 +6,9 @@ import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/screen/item_detail_screen.dart';
 
 class ItemsScreen extends StatefulWidget {
-  const ItemsScreen({Key? key}) : super(key: key);
+  final String searchText;
+
+  const ItemsScreen({Key? key, required this.searchText}) : super(key: key);
 
   @override
   _ItemsScreenState createState() => _ItemsScreenState();
@@ -74,7 +76,14 @@ class _ItemsScreenState extends State<ItemsScreen> {
   }
 
   Future<List<DbItemData>> _getItemsFromDatabase() async {
-    return await database.getAllItems();
+    if (widget.searchText.isEmpty)
+    {
+      return await database.getAllItems();
+    }
+    else
+    {
+      return await database.searchForItems(widget.searchText);
+    }
   }
 
   Widget itemListUI(List<DbItemData> itemList) {

@@ -13,6 +13,7 @@ class DbContainer extends Table {
   TextColumn get description => text().named('description')();
   TextColumn get date => text()();
 
+  // designates the primary key for the table
   @override
   Set<Column> get primaryKey => {uniqueId};
 }
@@ -24,6 +25,7 @@ class DbItem extends Table {
   TextColumn get description => text().named('description')();
   TextColumn get date => text()();
 
+  // designates the primary key for the table
   @override
   Set<Column> get primaryKey => {uniqueId};
 }
@@ -72,6 +74,11 @@ class AppDatabase extends _$AppDatabase {
     return await (select(dbContainer)..where((tbl) => tbl.uniqueId.equals(containerId))).getSingle();
   }
 
+  // search for container
+  Future<List<DbContainerData>> searchForContainers(String searchText) async {
+    return await (select(dbContainer)..where((tbl) => tbl.title.like("%" + searchText + "%"))).get();
+  }
+
   /* ---------------------------------------------------------------------------
    * Items
    * -------------------------------------------------------------------------*/
@@ -94,5 +101,10 @@ class AppDatabase extends _$AppDatabase {
   // delete item
   Future<int> deleteItem(DbItemData dbItemData) async {
     return await delete(dbItem).delete(dbItemData);
+  }
+
+  // search for items
+  Future<List<DbItemData>> searchForItems(String searchText) async {
+    return await (select(dbItem)..where((tbl) => tbl.title.like("%" + searchText + "%"))).get();
   }
 }

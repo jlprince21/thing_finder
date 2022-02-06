@@ -6,7 +6,9 @@ import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/screen/container_detail_screen.dart';
 
 class ContainersScreen extends StatefulWidget {
-  const ContainersScreen({Key? key}) : super(key: key);
+  final String searchText;
+
+  const ContainersScreen({Key? key, required this.searchText}) : super(key: key);
 
   @override
   _ContainersScreenState createState() => _ContainersScreenState();
@@ -74,7 +76,14 @@ class _ContainersScreenState extends State<ContainersScreen> {
   }
 
   Future<List<DbContainerData>> _getContainersFromDatabase() async {
-    return await database.getAllContainers();
+    if (widget.searchText.isEmpty)
+    {
+      return await database.getAllContainers();
+    }
+    else
+    {
+      return await database.searchForContainers(widget.searchText);
+    }
   }
 
   Widget containerListUI(List<DbContainerData> containerList) {
