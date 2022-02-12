@@ -20,7 +20,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   late TextEditingController titleEditingController;
   late TextEditingController descriptionEditingController;
   late String? selectedContainer;
-  late DbContainerData currentContainer;
+  late DbContainerData? currentContainer;
 
   @override
   void initState() {
@@ -28,7 +28,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     descriptionEditingController = TextEditingController();
     titleEditingController.text = widget.dbItemCompanion.title.value;
     descriptionEditingController.text = widget.dbItemCompanion.description.value;
-    currentContainer = new DbContainerData(uniqueId: "", date: "2022-01-01", description: "placeholder description", title: "placeholder title");
+    selectedContainer = null;
+    currentContainer = null;
 
     super.initState();
   }
@@ -37,12 +38,14 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   Widget build(BuildContext context) {
     appDatabase = Provider.of<AppDatabase>(context);
 
-    // TODO this needs to handle nulls ie when an item isn't in a container
-    appDatabase
-        .getContainer(widget.dbItemCompanion.container.value ?? "")
-        .then((value) => setState(() {
-              currentContainer = value;
-            }));
+    if (widget.dbItemCompanion.container.value != null)
+    {
+      appDatabase
+          .getContainer(widget.dbItemCompanion.container.value ?? "")
+          .then((value) => setState(() {
+                currentContainer = value;
+              }));
+    }
 
     return Scaffold(
       appBar: _getDetailAppBar(),
@@ -56,17 +59,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 if (snapshot.hasData) {
                   List<DbContainerData>? itemList = snapshot.data;
                   if (itemList != null) {
-                    if (itemList.isEmpty) {
-                      return Center(
-                        child: Text(
-                          'No containers found; click on add button to create one.',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyText2,
-                        ),
-                      );
-                    } else {
-                      return containerListPicker(itemList);
-                    }
+                    // TODO 2022-02-12 works when no containers are in DB but should investigate displaying a widget if snapshot data is null/fails to load
+                    itemList.insert(0, DbContainerData(uniqueId: "no-container", title: "(No Container)", date: "2022-01-01", description: "(No Container)"));
+                    return containerListPicker(itemList);
                   }
                 } else if (snapshot.hasError) {
                   return Center(
@@ -106,9 +101,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   hintText: 'Item Description'),
             ),
 
-            // TODO these need to conditionally render only to show on item detail
-            Text("Current container title: " + currentContainer.title),
-            Text("Current container uuid: " + currentContainer.uniqueId.toString()),
+            if (currentContainer != null) ...[
+              Text("Inside container: " + currentContainer!.title)
+            ]
           ],
         ),
       ),
@@ -117,19 +112,24 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
   Widget containerListPicker(List<DbContainerData> containerList) {
     return DropdownButtonFormField<DbContainerData>(
+      value: currentContainer ?? containerList[0],
       decoration: const InputDecoration(
         icon: Icon(Icons.widgets),
         hintText: 'Select container',
         labelText: 'Container *',
       ),
-      // value: selectedContainer,
       icon: Icon(Icons.arrow_downward),
       iconSize: 24,
       elevation: 16,
       style: TextStyle(color: Colors.deepPurple),
       onChanged: (DbContainerData? newValue) {
-        // TODO make null work with item's selected container
-        selectedContainer = newValue?.uniqueId ?? "";
+        if (newValue?.uniqueId == "no-container")
+        {
+          selectedContainer = null;
+        }
+        else {
+          selectedContainer = newValue?.uniqueId;
+        }
       },
       items: containerList.map((DbContainerData container) {
         return DropdownMenuItem<DbContainerData>(
@@ -198,7 +198,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   }
 
   void _saveToDb() {
-    // TODO for container in either saves below need to allow nulls
     if (widget.dbItemCompanion.uniqueId.present) {
       appDatabase
           .updateItem(DbItemData(
@@ -206,7 +205,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               title: titleEditingController.text,
               description: descriptionEditingController.text,
               date: DateFormat.yMMMd().format(DateTime.now()),
-              container: selectedContainer ?? null))
+              container: selectedContainer))
           .then((value) {
         Navigator.pop(context, true);
       });
@@ -220,8 +219,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             title: dr.Value(titleEditingController.text),
             description: dr.Value(descriptionEditingController.text),
             date: dr.Value(DateFormat.yMMMd().format(DateTime.now())),
-            container: dr.Value(selectedContainer),
-      ))
+            container: dr.Value(selectedContainer)))
           .then((value) {
         Navigator.pop(context, true);
       });

@@ -67,6 +67,7 @@ class AppDatabase extends _$AppDatabase {
 
   // delete container
   Future<int> deleteContainer(DbContainerData dbContainerData) async {
+    // TODO 2022-02-12 need to set all items' linked container field to null here
     return await delete(dbContainer).delete(dbContainerData);
   }
 
