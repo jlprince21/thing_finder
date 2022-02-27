@@ -1,7 +1,15 @@
 
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:drift/drift.dart' as dr;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/screen/containers_screen.dart';
 import 'package:thing_finder/screen/items_screen.dart';
 import 'package:thing_finder/screen/search_screen.dart';
@@ -14,8 +22,12 @@ class MainMenuScreen extends StatefulWidget {
 }
 
 class _MainMenuScreenState extends State<MainMenuScreen> {
+  late AppDatabase appDatabase;
+
   @override
   Widget build(BuildContext context) {
+    appDatabase = Provider.of<AppDatabase>(context);
+
     return Scaffold(
       appBar: _getMainMenuAppBar(),
       body: SingleChildScrollView(
@@ -67,6 +79,28 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                   ),
                 ),
               ),
+            Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    child: Text('Import Items to DB'),
+                    onPressed: () {
+                      _pickFile("item");
+                    },
+                  ),
+                ),
+              ),
+            Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    child: Text('Import Containers to DB'),
+                    onPressed: () {
+                      _pickFile("container");
+                    },
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -84,6 +118,77 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         style: Theme.of(context).textTheme.headline5,
       ),
     );
+  }
+
+  _createItem(String line) {
+    final split = line.split(',');
+    final Map<int, String> values = {
+      for (int i = 0; i < split.length; i++)
+        i: split[i]
+    };
+    print(values);
+
+    final itemId = values[0];
+    final containerId = values[1];
+    final itemTitle = values[2];
+
+    appDatabase
+      .createItem(DbItemCompanion(
+        uniqueId: dr.Value(itemId!),
+        title: dr.Value(itemTitle!),
+        description: dr.Value(""),
+        date: dr.Value(DateFormat.yMMMd().format(DateTime.now())),
+        container: dr.Value(containerId)));
+  }
+
+  _createContainer(String line) {
+    final split = line.split(',');
+    final Map<int, String> values = {
+      for (int i = 0; i < split.length; i++)
+        i: split[i]
+    };
+    print(values);
+
+    final containerId = values[0];
+    final containerTitle = values[1];
+
+    appDatabase
+      .createContainer(DbContainerCompanion(
+        uniqueId: dr.Value(containerId!),
+        title: dr.Value(containerTitle!),
+        description: dr.Value(""),
+        date: dr.Value(DateFormat.yMMMd().format(DateTime.now())),
+        ));
+  }
+
+  _pickFile(String itemOrContainer) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      File file = File(result.files.single.path!);
+      print("path: " + file.path);
+
+      if (itemOrContainer == "item")
+      {
+        new File(file.path)
+          .openRead()
+          .transform(utf8.decoder)
+          .transform(new LineSplitter())
+          .forEach((l) => _createItem(l));
+      }
+      else if (itemOrContainer == "container")
+      {
+        new File(file.path)
+          .openRead()
+          .transform(utf8.decoder)
+          .transform(new LineSplitter())
+          .forEach((l) => _createContainer(l));
+      }
+
+    } else {
+      // User canceled the picker
+      print("Failed");
+    }
   }
 
   exportDatabase() async {

@@ -57,7 +57,7 @@ class AppDatabase extends _$AppDatabase {
 
   // retrieve all containers
   Future<List<DbContainerData>> getAllContainers() async {
-    return await select(dbContainer).get();
+    return await (select(dbContainer)..orderBy([(t) => OrderingTerm(expression: t.title)])).get();
   }
 
   // update container
@@ -91,7 +91,7 @@ class AppDatabase extends _$AppDatabase {
 
   // retrieve all items
   Future<List<DbItemData>> getAllItems() async {
-    return await select(dbItem).get();
+    return await (select(dbItem)..orderBy([(t) => OrderingTerm(expression: t.title)])).get();
   }
 
   // update item
