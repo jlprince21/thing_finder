@@ -27,7 +27,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     titleEditingController = TextEditingController();
     descriptionEditingController = TextEditingController();
     titleEditingController.text = widget.dbItemCompanion.title.value;
-    descriptionEditingController.text = widget.dbItemCompanion.description.value;
+    descriptionEditingController.text = widget.dbItemCompanion.description.value ?? "";
     selectedContainer = null;
     currentContainer = null;
 
@@ -203,7 +203,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           .updateItem(DbItemData(
               uniqueId: widget.dbItemCompanion.uniqueId.value,
               title: titleEditingController.text,
-              description: descriptionEditingController.text,
+              description: descriptionEditingController.text.isEmpty ? null : descriptionEditingController.text,
               date: DateFormat.yMMMd().format(DateTime.now()),
               container: selectedContainer))
           .then((value) {
@@ -217,7 +217,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           .createItem(DbItemCompanion(
             uniqueId: dr.Value(id),
             title: dr.Value(titleEditingController.text),
-            description: dr.Value(descriptionEditingController.text),
+            description: descriptionEditingController.text.isEmpty ? dr.Value(null) : dr.Value(descriptionEditingController.text),
             date: dr.Value(DateFormat.yMMMd().format(DateTime.now())),
             container: dr.Value(selectedContainer)))
           .then((value) {
@@ -243,6 +243,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
+                // TODO make delete work with just an id
                 appDatabase
                     .deleteItem(DbItemData(
                         uniqueId: widget.dbItemCompanion.uniqueId.value,

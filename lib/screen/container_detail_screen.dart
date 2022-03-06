@@ -24,7 +24,7 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
     titleEditingController = TextEditingController();
     descriptionEditingController = TextEditingController();
     titleEditingController.text = widget.dbContainerCompanion.title.value;
-    descriptionEditingController.text = widget.dbContainerCompanion.description.value;
+    descriptionEditingController.text = widget.dbContainerCompanion.description.value ?? "";
     super.initState();
   }
 
@@ -110,7 +110,7 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
           .updateContainer(DbContainerData(
               uniqueId: widget.dbContainerCompanion.uniqueId.value,
               title: titleEditingController.text,
-              description: descriptionEditingController.text,
+              description: descriptionEditingController.text.isEmpty ? null : descriptionEditingController.text,
               date: DateFormat.yMMMd().format(DateTime.now())))
           .then((value) {
         Navigator.pop(context, true);
@@ -123,7 +123,7 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
           .createContainer(DbContainerCompanion(
               uniqueId: dr.Value(id),
               title: dr.Value(titleEditingController.text),
-              description: dr.Value(descriptionEditingController.text),
+              description: descriptionEditingController.text.isEmpty ? dr.Value(null) : dr.Value(descriptionEditingController.text),
               date: dr.Value(DateFormat.yMMMd().format(DateTime.now()))))
           .then((value) {
         Navigator.pop(context, true);

@@ -123,7 +123,7 @@ class _ContainersScreenState extends State<ContainersScreen> {
                   ],
                 ),
                 Text(
-                  dbContainerData.description,
+                  dbContainerData.description ?? "",
                   style: Theme.of(context).textTheme.bodyText1,
                 ),
                 Row(

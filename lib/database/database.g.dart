@@ -10,12 +10,12 @@ part of 'database.dart';
 class DbContainerData extends DataClass implements Insertable<DbContainerData> {
   final String uniqueId;
   final String title;
-  final String description;
+  final String? description;
   final String date;
   DbContainerData(
       {required this.uniqueId,
       required this.title,
-      required this.description,
+      this.description,
       required this.date});
   factory DbContainerData.fromData(Map<String, dynamic> data,
       {String? prefix}) {
@@ -26,7 +26,7 @@ class DbContainerData extends DataClass implements Insertable<DbContainerData> {
       title: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}title'])!,
       description: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}description'])!,
+          .mapFromDatabaseResponse(data['${effectivePrefix}description']),
       date: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}date'])!,
     );
@@ -36,7 +36,9 @@ class DbContainerData extends DataClass implements Insertable<DbContainerData> {
     final map = <String, Expression>{};
     map['unique_id'] = Variable<String>(uniqueId);
     map['title'] = Variable<String>(title);
-    map['description'] = Variable<String>(description);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String?>(description);
+    }
     map['date'] = Variable<String>(date);
     return map;
   }
@@ -45,7 +47,9 @@ class DbContainerData extends DataClass implements Insertable<DbContainerData> {
     return DbContainerCompanion(
       uniqueId: Value(uniqueId),
       title: Value(title),
-      description: Value(description),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
       date: Value(date),
     );
   }
@@ -56,7 +60,7 @@ class DbContainerData extends DataClass implements Insertable<DbContainerData> {
     return DbContainerData(
       uniqueId: serializer.fromJson<String>(json['uniqueId']),
       title: serializer.fromJson<String>(json['title']),
-      description: serializer.fromJson<String>(json['description']),
+      description: serializer.fromJson<String?>(json['description']),
       date: serializer.fromJson<String>(json['date']),
     );
   }
@@ -66,7 +70,7 @@ class DbContainerData extends DataClass implements Insertable<DbContainerData> {
     return <String, dynamic>{
       'uniqueId': serializer.toJson<String>(uniqueId),
       'title': serializer.toJson<String>(title),
-      'description': serializer.toJson<String>(description),
+      'description': serializer.toJson<String?>(description),
       'date': serializer.toJson<String>(date),
     };
   }
@@ -108,7 +112,7 @@ class DbContainerData extends DataClass implements Insertable<DbContainerData> {
 class DbContainerCompanion extends UpdateCompanion<DbContainerData> {
   final Value<String> uniqueId;
   final Value<String> title;
-  final Value<String> description;
+  final Value<String?> description;
   final Value<String> date;
   const DbContainerCompanion({
     this.uniqueId = const Value.absent(),
@@ -119,16 +123,15 @@ class DbContainerCompanion extends UpdateCompanion<DbContainerData> {
   DbContainerCompanion.insert({
     required String uniqueId,
     required String title,
-    required String description,
+    this.description = const Value.absent(),
     required String date,
   })  : uniqueId = Value(uniqueId),
         title = Value(title),
-        description = Value(description),
         date = Value(date);
   static Insertable<DbContainerData> custom({
     Expression<String>? uniqueId,
     Expression<String>? title,
-    Expression<String>? description,
+    Expression<String?>? description,
     Expression<String>? date,
   }) {
     return RawValuesInsertable({
@@ -142,7 +145,7 @@ class DbContainerCompanion extends UpdateCompanion<DbContainerData> {
   DbContainerCompanion copyWith(
       {Value<String>? uniqueId,
       Value<String>? title,
-      Value<String>? description,
+      Value<String?>? description,
       Value<String>? date}) {
     return DbContainerCompanion(
       uniqueId: uniqueId ?? this.uniqueId,
@@ -162,7 +165,7 @@ class DbContainerCompanion extends UpdateCompanion<DbContainerData> {
       map['title'] = Variable<String>(title.value);
     }
     if (description.present) {
-      map['description'] = Variable<String>(description.value);
+      map['description'] = Variable<String?>(description.value);
     }
     if (date.present) {
       map['date'] = Variable<String>(date.value);
@@ -201,8 +204,8 @@ class $DbContainerTable extends DbContainer
       const VerificationMeta('description');
   @override
   late final GeneratedColumn<String?> description = GeneratedColumn<String?>(
-      'description', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      'description', aliasedName, true,
+      type: const StringType(), requiredDuringInsert: false);
   final VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
   late final GeneratedColumn<String?> date = GeneratedColumn<String?>(
@@ -236,8 +239,6 @@ class $DbContainerTable extends DbContainer
           _descriptionMeta,
           description.isAcceptableOrUnknown(
               data['description']!, _descriptionMeta));
-    } else if (isInserting) {
-      context.missing(_descriptionMeta);
     }
     if (data.containsKey('date')) {
       context.handle(
@@ -266,13 +267,13 @@ class DbItemData extends DataClass implements Insertable<DbItemData> {
   final String uniqueId;
   final String? container;
   final String title;
-  final String description;
+  final String? description;
   final String date;
   DbItemData(
       {required this.uniqueId,
       this.container,
       required this.title,
-      required this.description,
+      this.description,
       required this.date});
   factory DbItemData.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
@@ -284,7 +285,7 @@ class DbItemData extends DataClass implements Insertable<DbItemData> {
       title: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}title'])!,
       description: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}description'])!,
+          .mapFromDatabaseResponse(data['${effectivePrefix}description']),
       date: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}date'])!,
     );
@@ -297,7 +298,9 @@ class DbItemData extends DataClass implements Insertable<DbItemData> {
       map['container'] = Variable<String?>(container);
     }
     map['title'] = Variable<String>(title);
-    map['description'] = Variable<String>(description);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String?>(description);
+    }
     map['date'] = Variable<String>(date);
     return map;
   }
@@ -309,7 +312,9 @@ class DbItemData extends DataClass implements Insertable<DbItemData> {
           ? const Value.absent()
           : Value(container),
       title: Value(title),
-      description: Value(description),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
       date: Value(date),
     );
   }
@@ -321,7 +326,7 @@ class DbItemData extends DataClass implements Insertable<DbItemData> {
       uniqueId: serializer.fromJson<String>(json['uniqueId']),
       container: serializer.fromJson<String?>(json['container']),
       title: serializer.fromJson<String>(json['title']),
-      description: serializer.fromJson<String>(json['description']),
+      description: serializer.fromJson<String?>(json['description']),
       date: serializer.fromJson<String>(json['date']),
     );
   }
@@ -332,7 +337,7 @@ class DbItemData extends DataClass implements Insertable<DbItemData> {
       'uniqueId': serializer.toJson<String>(uniqueId),
       'container': serializer.toJson<String?>(container),
       'title': serializer.toJson<String>(title),
-      'description': serializer.toJson<String>(description),
+      'description': serializer.toJson<String?>(description),
       'date': serializer.toJson<String>(date),
     };
   }
@@ -380,7 +385,7 @@ class DbItemCompanion extends UpdateCompanion<DbItemData> {
   final Value<String> uniqueId;
   final Value<String?> container;
   final Value<String> title;
-  final Value<String> description;
+  final Value<String?> description;
   final Value<String> date;
   const DbItemCompanion({
     this.uniqueId = const Value.absent(),
@@ -393,17 +398,16 @@ class DbItemCompanion extends UpdateCompanion<DbItemData> {
     required String uniqueId,
     this.container = const Value.absent(),
     required String title,
-    required String description,
+    this.description = const Value.absent(),
     required String date,
   })  : uniqueId = Value(uniqueId),
         title = Value(title),
-        description = Value(description),
         date = Value(date);
   static Insertable<DbItemData> custom({
     Expression<String>? uniqueId,
     Expression<String?>? container,
     Expression<String>? title,
-    Expression<String>? description,
+    Expression<String?>? description,
     Expression<String>? date,
   }) {
     return RawValuesInsertable({
@@ -419,7 +423,7 @@ class DbItemCompanion extends UpdateCompanion<DbItemData> {
       {Value<String>? uniqueId,
       Value<String?>? container,
       Value<String>? title,
-      Value<String>? description,
+      Value<String?>? description,
       Value<String>? date}) {
     return DbItemCompanion(
       uniqueId: uniqueId ?? this.uniqueId,
@@ -443,7 +447,7 @@ class DbItemCompanion extends UpdateCompanion<DbItemData> {
       map['title'] = Variable<String>(title.value);
     }
     if (description.present) {
-      map['description'] = Variable<String>(description.value);
+      map['description'] = Variable<String?>(description.value);
     }
     if (date.present) {
       map['date'] = Variable<String>(date.value);
@@ -489,8 +493,8 @@ class $DbItemTable extends DbItem with TableInfo<$DbItemTable, DbItemData> {
       const VerificationMeta('description');
   @override
   late final GeneratedColumn<String?> description = GeneratedColumn<String?>(
-      'description', aliasedName, false,
-      type: const StringType(), requiredDuringInsert: true);
+      'description', aliasedName, true,
+      type: const StringType(), requiredDuringInsert: false);
   final VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
   late final GeneratedColumn<String?> date = GeneratedColumn<String?>(
@@ -529,8 +533,6 @@ class $DbItemTable extends DbItem with TableInfo<$DbItemTable, DbItemData> {
           _descriptionMeta,
           description.isAcceptableOrUnknown(
               data['description']!, _descriptionMeta));
-    } else if (isInserting) {
-      context.missing(_descriptionMeta);
     }
     if (data.containsKey('date')) {
       context.handle(

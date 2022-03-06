@@ -10,7 +10,7 @@ part 'database.g.dart';
 class DbContainer extends Table {
   TextColumn get uniqueId => text()();
   TextColumn get title => text()();
-  TextColumn get description => text().named('description')();
+  TextColumn get description => text().nullable().named('description')();
   TextColumn get date => text()();
 
   // designates the primary key for the table
@@ -22,7 +22,7 @@ class DbItem extends Table {
   TextColumn get uniqueId => text()();
   TextColumn get container => text().nullable().references(DbContainer, #uniqueId)();
   TextColumn get title => text()();
-  TextColumn get description => text().named('description')();
+  TextColumn get description => text().nullable().named('description')();
   TextColumn get date => text()();
 
   // designates the primary key for the table

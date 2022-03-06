@@ -131,12 +131,13 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     final itemId = values[0];
     final containerId = values[1];
     final itemTitle = values[2];
+    // TODO support description and date fields someday
 
     appDatabase
       .createItem(DbItemCompanion(
         uniqueId: dr.Value(itemId!),
         title: dr.Value(itemTitle!),
-        description: dr.Value(""),
+        description: dr.Value(null),
         date: dr.Value(DateFormat.yMMMd().format(DateTime.now())),
         container: dr.Value(containerId)));
   }
@@ -151,12 +152,13 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
 
     final containerId = values[0];
     final containerTitle = values[1];
+    // TODO support description and date fields someday
 
     appDatabase
       .createContainer(DbContainerCompanion(
         uniqueId: dr.Value(containerId!),
         title: dr.Value(containerTitle!),
-        description: dr.Value(""),
+        description: dr.Value(null),
         date: dr.Value(DateFormat.yMMMd().format(DateTime.now())),
         ));
   }

@@ -124,7 +124,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
                   ],
                 ),
                 Text(
-                  dbItemData.description,
+                  dbItemData.description ?? "",
                   style: Theme.of(context).textTheme.bodyText1,
                 ),
                 Row(
