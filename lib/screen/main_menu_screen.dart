@@ -121,7 +121,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   _createItem(String line) {
-    final split = line.split(',');
+    // TODO using a CSV parser may make this easier
+    final split = line.split('|');
     final Map<int, String> values = {
       for (int i = 0; i < split.length; i++)
         i: split[i]
@@ -131,19 +132,21 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     final itemId = values[0];
     final containerId = values[1];
     final itemTitle = values[2];
-    // TODO support description and date fields someday
+    final itemDescription = values[3];
+    final itemDate = values[4];
 
     appDatabase
       .createItem(DbItemCompanion(
         uniqueId: dr.Value(itemId!),
         title: dr.Value(itemTitle!),
-        description: dr.Value(null),
-        date: dr.Value(DateFormat.yMMMd().format(DateTime.now())),
+        description: itemDescription == null ? dr.Value(null) : dr.Value(itemDescription),
+        date: dr.Value(itemDate!),
         container: dr.Value(containerId)));
   }
 
   _createContainer(String line) {
-    final split = line.split(',');
+    // TODO using a CSV parser may make this easier
+    final split = line.split('|');
     final Map<int, String> values = {
       for (int i = 0; i < split.length; i++)
         i: split[i]
@@ -152,14 +155,15 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
 
     final containerId = values[0];
     final containerTitle = values[1];
-    // TODO support description and date fields someday
+    final containerDescription = values[2];
+    final containerDate = values[3];
 
     appDatabase
       .createContainer(DbContainerCompanion(
         uniqueId: dr.Value(containerId!),
         title: dr.Value(containerTitle!),
-        description: dr.Value(null),
-        date: dr.Value(DateFormat.yMMMd().format(DateTime.now())),
+        description: containerDescription == null ? dr.Value(null) : dr.Value(containerDescription),
+        date: dr.Value(containerDate!),
         ));
   }
 

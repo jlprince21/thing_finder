@@ -57,11 +57,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               future: _getContainersFromDatabase(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  List<DbContainerData>? itemList = snapshot.data;
-                  if (itemList != null) {
-                    // TODO 2022-02-12 works when no containers are in DB but should investigate displaying a widget if snapshot data is null/fails to load
-                    itemList.insert(0, DbContainerData(uniqueId: "no-container", title: "(No Container)", date: "2022-01-01", description: "(No Container)"));
-                    return containerListPicker(itemList);
+                  List<DbContainerData>? containerList = snapshot.data;
+                  if (containerList != null) {
+                    containerList.insert(0, DbContainerData(uniqueId: "no-container", title: "(No Container)", date: "2022-01-01", description: "(No Container)"));
+                    return containerListPicker(containerList);
                   }
                 } else if (snapshot.hasError) {
                   return Center(

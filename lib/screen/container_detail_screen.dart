@@ -148,6 +148,7 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
+                // TODO make delete work with just an id
                 appDatabase
                     .deleteContainer(DbContainerData(
                         uniqueId: widget.dbContainerCompanion.uniqueId.value,
