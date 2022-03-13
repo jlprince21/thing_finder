@@ -4,6 +4,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/screen/item_detail_screen.dart';
+import 'package:thing_finder/util/app_drawer.dart';
 
 class ItemsScreen extends StatefulWidget {
   final String searchText;
@@ -22,6 +23,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
     database = Provider.of<AppDatabase>(context);
     return Scaffold(
       appBar: _getItemsAppBar(),
+      drawer: AppDrawer(),
       body: FutureBuilder<List<DbItemData>>(
         future: _getItemsFromDatabase(),
         builder: (context, snapshot) {
@@ -179,12 +181,12 @@ class _ItemsScreenState extends State<ItemsScreen> {
 
   _getItemsAppBar() {
     return AppBar(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white,
       centerTitle: true,
       elevation: 0,
       title: Text(
         'Items',
-        style: Theme.of(context).textTheme.headline5,
+        // style: Theme.of(context).textTheme.headline5,
       ),
       actions: [
         IconButton(
@@ -198,7 +200,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
           },
           icon: Icon(
             axisCount == 4 ? Icons.grid_on : Icons.list,
-            color: Colors.black,
+            // color: Colors.black,
           ),
         )
       ],

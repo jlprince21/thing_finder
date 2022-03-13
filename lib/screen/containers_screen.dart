@@ -4,6 +4,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/screen/container_detail_screen.dart';
+import 'package:thing_finder/util/app_drawer.dart';
 
 class ContainersScreen extends StatefulWidget {
   final String searchText;
@@ -22,6 +23,7 @@ class _ContainersScreenState extends State<ContainersScreen> {
     database = Provider.of<AppDatabase>(context);
     return Scaffold(
       appBar: _getContainersAppBar(),
+      drawer: AppDrawer(),
       body: FutureBuilder<List<DbContainerData>>(
         future: _getContainersFromDatabase(),
         builder: (context, snapshot) {
@@ -163,12 +165,12 @@ class _ContainersScreenState extends State<ContainersScreen> {
 
   _getContainersAppBar() {
     return AppBar(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white,
       centerTitle: true,
       elevation: 0,
       title: Text(
         'Containers',
-        style: Theme.of(context).textTheme.headline5,
+        // style: Theme.of(context).textTheme.headline5,
       ),
       actions: [
         IconButton(
@@ -182,7 +184,7 @@ class _ContainersScreenState extends State<ContainersScreen> {
           },
           icon: Icon(
             axisCount == 4 ? Icons.grid_on : Icons.list,
-            color: Colors.black,
+            // color: Colors.black,
           ),
         )
       ],

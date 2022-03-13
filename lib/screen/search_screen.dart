@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:thing_finder/screen/containers_screen.dart';
 import 'package:thing_finder/screen/items_screen.dart';
+import 'package:thing_finder/util/app_drawer.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -25,6 +26,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _getSearchAppBar(),
+      drawer: AppDrawer(),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -87,12 +89,12 @@ class _SearchScreenState extends State<SearchScreen> {
 
   _getSearchAppBar(){
     return AppBar(
-      backgroundColor: Colors.white,
+      // backgroundColor: Colors.white,
       centerTitle: true,
       elevation: 0,
       title: Text(
         'Search',
-        style: Theme.of(context).textTheme.headline5,
+        // style: Theme.of(context).textTheme.headline5,
       ),
     );
   }

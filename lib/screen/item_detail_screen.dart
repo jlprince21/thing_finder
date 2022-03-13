@@ -158,12 +158,12 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         },
         icon: const Icon(
           Icons.chevron_left_outlined,
-          color: Colors.black,
+          // color: Colors.black,
         ),
       ),
       title: Text(
         widget.title,
-        style: const TextStyle(color: Colors.black),
+        // style: const TextStyle(color: Colors.black),
       ),
       actions: [
         IconButton(
@@ -172,7 +172,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           },
           icon: const Icon(
             Icons.save,
-            color: Colors.black,
+            // color: Colors.black,
           ),
         ),
         IconButton(
@@ -181,7 +181,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           },
           icon: const Icon(
             Icons.delete,
-            color: Colors.black,
+            // color: Colors.black,
           ),
         ),
       ],
