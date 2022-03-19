@@ -113,4 +113,9 @@ class AppDatabase extends _$AppDatabase {
   Future<List<DbItemData>> searchForItems(String searchText) async {
     return await (select(dbItem)..where((tbl) => tbl.title.like("%" + searchText + "%"))).get();
   }
+
+  // get all items in a particular container
+  Future<List<DbItemData>> getContainerContents(String containerId) async {
+    return await (select(dbItem)..where((tbl) => tbl.container.like("%" + containerId + "%"))).get();
+  }
 }

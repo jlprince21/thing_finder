@@ -1,8 +1,11 @@
 import 'package:drift/drift.dart' as dr;
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:provider/provider.dart';
+import 'package:thing_finder/screen/items_screen.dart';
+import 'package:thing_finder/screen/container_detail_screen.dart';
 import 'package:uuid/uuid.dart';
 
 class ItemDetailScreen extends StatefulWidget {
@@ -101,7 +104,20 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             ),
 
             if (currentContainer != null) ...[
-              Text("Inside container: " + currentContainer!.title)
+              Text("Inside container: " + currentContainer!.title),
+              ElevatedButton(
+                onPressed: () {
+                  // TODO 2022-03-19 another great place demonstrating need to use container id instead lol
+                  Get.to(ContainerDetailScreen(
+                      title: 'Edit Container',
+                      dbContainerCompanion: DbContainerCompanion(
+                          date: dr.Value(currentContainer!.date),
+                          description: dr.Value(currentContainer!.description),
+                          title: dr.Value(currentContainer!.title),
+                          uniqueId: dr.Value(currentContainer!.uniqueId))));
+                },
+                child: const Text('Go to Container'),
+              ),
             ]
           ],
         ),

@@ -45,7 +45,7 @@ class AppDrawer extends StatelessWidget {
       ListTile(
         title: const Text('Items'),
         onTap: () {
-          Get.to(ItemsScreen(searchText: ""));
+          Get.to(ItemsScreen(searchText: "", containerId: ""));
         },
       ),
     );

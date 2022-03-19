@@ -70,7 +70,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     onPressed: () {
                       if (searchType == "item")
                       {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => ItemsScreen(searchText: searchController.text)));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => ItemsScreen(searchText: searchController.text, containerId: "")));
                       }
                       else
                       {

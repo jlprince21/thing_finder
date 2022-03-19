@@ -149,6 +149,7 @@ class _ContainersScreenState extends State<ContainersScreen> {
   }
 
   _navigateToDetail(String title, DbContainerCompanion dbContainerCompanion) async {
+    // TODO 2022-03-19 switch to using getx for navigation
     var res = await Navigator.push(
       context,
       MaterialPageRoute(

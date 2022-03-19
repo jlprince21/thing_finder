@@ -8,8 +8,11 @@ import 'package:thing_finder/util/app_drawer.dart';
 
 class ItemsScreen extends StatefulWidget {
   final String searchText;
+  final String containerId;
 
-  const ItemsScreen({Key? key, required this.searchText}) : super(key: key);
+  // TODO 2022-03-19 someday having an enum to get this more manageable with just one
+  // search/filter string would simplify things
+  const ItemsScreen({Key? key, required this.searchText, required this.containerId}) : super(key: key);
 
   @override
   _ItemsScreenState createState() => _ItemsScreenState();
@@ -78,13 +81,17 @@ class _ItemsScreenState extends State<ItemsScreen> {
   }
 
   Future<List<DbItemData>> _getItemsFromDatabase() async {
-    if (widget.searchText.isEmpty)
+    if (widget.searchText.isEmpty == false && widget.containerId.isEmpty)
     {
-      return await database.getAllItems();
+      return await database.searchForItems(widget.searchText);
+    }
+    else if (widget.searchText.isEmpty && widget.containerId.isEmpty == false)
+    {
+      return await database.getContainerContents(widget.containerId);
     }
     else
     {
-      return await database.searchForItems(widget.searchText);
+      return await database.getAllItems();
     }
   }
 

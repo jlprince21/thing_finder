@@ -1,8 +1,10 @@
 import 'package:drift/drift.dart' as dr;
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:provider/provider.dart';
+import 'package:thing_finder/screen/items_screen.dart';
 import 'package:uuid/uuid.dart';
 
 class ContainerDetailScreen extends StatefulWidget {
@@ -58,6 +60,12 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
                     borderRadius: BorderRadius.circular(5),
                   ),
                   hintText: 'Container Description'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Get.to(ItemsScreen(searchText: "", containerId: widget.dbContainerCompanion.uniqueId.value));
+              },
+              child: const Text('View Contents'),
             ),
           ],
         ),
