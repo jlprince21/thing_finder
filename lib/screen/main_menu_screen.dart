@@ -24,7 +24,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       body: ListView(
           // Important: Remove any padding from the ListView.
           // padding: EdgeInsets.zero,
-          children: AppDrawer.getMenu()
+          children: AppDrawer.getMenu(includeMainMenu: false)
         ),
     );
   }
@@ -32,7 +32,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   ButtonStyle getButtonStyle() {
     return ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12), // <-- Radius
+      borderRadius: BorderRadius.circular(12),
     ));
   }
 

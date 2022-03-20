@@ -170,6 +170,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       elevation: 0,
       leading: IconButton(
         onPressed: () {
+          // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
+          // deleted item will still appear on item screen. would be nice to have it properly
+          // navigate *back* to item/container search with original parameters too
           Navigator.pop(context);
         },
         icon: const Icon(
@@ -222,6 +225,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               date: DateFormat.yMMMd().format(DateTime.now()),
               container: selectedContainer))
           .then((value) {
+        // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
+        // deleted item will still appear on item screen. would be nice to have it properly
+        // navigate *back* to item/container search with original parameters too
         Navigator.pop(context, true);
       });
     } else {
@@ -236,6 +242,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             date: dr.Value(DateFormat.yMMMd().format(DateTime.now())),
             container: dr.Value(selectedContainer)))
           .then((value) {
+        // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
+        // deleted item will still appear on item screen. would be nice to have it properly
+        // navigate *back* to item/container search with original parameters too
         Navigator.pop(context, true);
       });
     }
@@ -251,12 +260,18 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           actions: [
             TextButton(
               onPressed: () {
+                // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
+                // deleted item will still appear on item screen. would be nice to have it properly
+                // navigate *back* to item/container search with original parameters too
                 Navigator.pop(context);
               },
               child: Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
+                // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
+                // deleted item will still appear on item screen. would be nice to have it properly
+                // navigate *back* to item/container search with original parameters too
                 Navigator.pop(context);
                 // TODO make delete work with just an id
                 appDatabase
@@ -267,6 +282,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                         date: DateFormat.yMMMd().format(DateTime.now()),
                         container: widget.dbItemCompanion.container.value))
                     .then((value) {
+                  // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
+                  // deleted item will still appear on item screen. would be nice to have it properly
+                  // navigate *back* to item/container search with original parameters too
                   Navigator.pop(context, true);
                 });
               },

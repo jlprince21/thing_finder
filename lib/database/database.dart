@@ -57,7 +57,7 @@ class AppDatabase extends _$AppDatabase {
 
   // retrieve all containers
   Future<List<DbContainerData>> getAllContainers() async {
-    return await (select(dbContainer)..orderBy([(t) => OrderingTerm(expression: t.title)])).get();
+    return await (select(dbContainer)..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
   }
 
   // update container
@@ -82,7 +82,7 @@ class AppDatabase extends _$AppDatabase {
 
   // search for container
   Future<List<DbContainerData>> searchForContainers(String searchText) async {
-    return await (select(dbContainer)..where((tbl) => tbl.title.like("%" + searchText + "%"))).get();
+    return await (select(dbContainer)..where((tbl) => tbl.title.like("%" + searchText + "%"))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
   }
 
   /* ---------------------------------------------------------------------------
@@ -96,7 +96,7 @@ class AppDatabase extends _$AppDatabase {
 
   // retrieve all items
   Future<List<DbItemData>> getAllItems() async {
-    return await (select(dbItem)..orderBy([(t) => OrderingTerm(expression: t.title)])).get();
+    return await (select(dbItem)..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
   }
 
   // update item
@@ -111,7 +111,7 @@ class AppDatabase extends _$AppDatabase {
 
   // search for items
   Future<List<DbItemData>> searchForItems(String searchText) async {
-    return await (select(dbItem)..where((tbl) => tbl.title.like("%" + searchText + "%"))).get();
+    return await (select(dbItem)..where((tbl) => tbl.title.like("%" + searchText + "%"))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
   }
 
   // get all items in a particular container

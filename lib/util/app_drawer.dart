@@ -17,7 +17,7 @@ class AppDrawer extends StatelessWidget {
       ),
       child: Text('Thing Finder!'),
     ));
-    drawerWidgets.addAll(getMenu());
+    drawerWidgets.addAll(getMenu(includeMainMenu: true));
 
     return Drawer(
         child: ListView(
@@ -28,18 +28,20 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  static List<Widget> getMenu()
+  static List<Widget> getMenu({required bool includeMainMenu})
   {
     List <Widget> menuEntries = <Widget>[];
 
-    menuEntries.add(
-      ListTile(
-        title: const Text('Main Menu'),
-        onTap: () {
-          Get.to(MainMenuScreen());
-        },
-      ),
-    );
+    if (includeMainMenu == true) {
+      menuEntries.add(
+        ListTile(
+          title: const Text('Main Menu'),
+          onTap: () {
+            Get.to(MainMenuScreen());
+          },
+        ),
+      );
+    }
 
     menuEntries.add(
       ListTile(

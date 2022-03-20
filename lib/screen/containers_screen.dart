@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' as dr;
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/screen/container_detail_screen.dart';
@@ -92,6 +93,10 @@ class _ContainersScreenState extends State<ContainersScreen> {
     return StaggeredGridView.countBuilder(
       itemCount: containerList.length,
       crossAxisCount: 4,
+      staggeredTileBuilder: (index) => StaggeredTile.fit(axisCount),
+      mainAxisSpacing: 8,
+      crossAxisSpacing: 4,
+      padding: EdgeInsets.only(top: 10),
       itemBuilder: (context, index) {
         DbContainerData dbContainerData = containerList[index];
         return InkWell(
@@ -142,14 +147,13 @@ class _ContainersScreenState extends State<ContainersScreen> {
           ),
         );
       },
-      staggeredTileBuilder: (index) => StaggeredTile.fit(axisCount),
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 4,
     );
   }
 
   _navigateToDetail(String title, DbContainerCompanion dbContainerCompanion) async {
-    // TODO 2022-03-19 switch to using getx for navigation
+    // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
+    // deleted item will still appear on item screen. would be nice to have it properly
+    // navigate *back* to item/container search with original parameters too
     var res = await Navigator.push(
       context,
       MaterialPageRoute(

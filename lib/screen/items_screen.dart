@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' as dr;
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/screen/item_detail_screen.dart';
@@ -99,6 +100,10 @@ class _ItemsScreenState extends State<ItemsScreen> {
     return StaggeredGridView.countBuilder(
       itemCount: itemList.length,
       crossAxisCount: 4,
+      staggeredTileBuilder: (index) => StaggeredTile.fit(axisCount),
+      mainAxisSpacing: 8,
+      crossAxisSpacing: 4,
+      padding: EdgeInsets.only(top: 10),
       itemBuilder: (context, index) {
         DbItemData dbItemData = itemList[index];
         return InkWell(
@@ -150,13 +155,13 @@ class _ItemsScreenState extends State<ItemsScreen> {
           ),
         );
       },
-      staggeredTileBuilder: (index) => StaggeredTile.fit(axisCount),
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 4,
     );
   }
 
   _navigateToDetail(String title, DbItemCompanion dbItemCompanion) async {
+    // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
+    // deleted item will still appear on item screen. would be nice to have it properly
+    // navigate *back* to item/container search with original parameters too
     var res = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -172,6 +177,9 @@ class _ItemsScreenState extends State<ItemsScreen> {
   }
 
   _navigateToCreate(String title, DbItemCompanion dbItemCompanion) async {
+    // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
+    // deleted item will still appear on item screen. would be nice to have it properly
+    // navigate *back* to item/container search with original parameters too
     var res = await Navigator.push(
       context,
       MaterialPageRoute(

@@ -70,10 +70,16 @@ class _SearchScreenState extends State<SearchScreen> {
                     onPressed: () {
                       if (searchType == "item")
                       {
+                        // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
+                        // deleted item will still appear on item screen. would be nice to have it properly
+                        // navigate *back* to item/container search with original parameters too
                         Navigator.push(context, MaterialPageRoute(builder: (context) => ItemsScreen(searchText: searchController.text, containerId: "")));
                       }
                       else
                       {
+                        // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
+                        // deleted item will still appear on item screen. would be nice to have it properly
+                        // navigate *back* to item/container search with original parameters too
                         Navigator.push(context, MaterialPageRoute(builder: (context) => ContainersScreen(searchText: searchController.text)));
                       }
                     },
