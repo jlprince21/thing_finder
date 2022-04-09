@@ -24,7 +24,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       body: ListView(
           // Important: Remove any padding from the ListView.
           // padding: EdgeInsets.zero,
-          children: AppDrawer.getMenu(includeMainMenu: false)
+          children: AppDrawer.getMenu(context, includeMainMenu: false)
         ),
     );
   }

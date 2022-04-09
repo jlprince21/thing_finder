@@ -17,7 +17,7 @@ class AppDrawer extends StatelessWidget {
       ),
       child: Text('Thing Finder!'),
     ));
-    drawerWidgets.addAll(getMenu(includeMainMenu: true));
+    drawerWidgets.addAll(getMenu(context, includeMainMenu: true));
 
     return Drawer(
         child: ListView(
@@ -28,9 +28,27 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  static List<Widget> getMenu({required bool includeMainMenu})
+  static List<Widget> getMenu(BuildContext context, {required bool includeMainMenu})
   {
     List <Widget> menuEntries = <Widget>[];
+
+    final ThemeData theme = Theme.of(context);
+    final TextStyle textStyle = theme.textTheme.bodyText2!;
+
+    final List<Widget> aboutBoxChildren = <Widget>[
+      const SizedBox(height: 24),
+      RichText(
+        text: TextSpan(
+          children: <TextSpan>[
+            TextSpan(
+                style: textStyle,
+                text: "Thing Finder helps you organize, store, and"
+                    ' retrieve your... well... things!'),
+            // TextSpan(text: '.'),
+          ],
+        ),
+      ),
+    ];
 
     if (includeMainMenu == true) {
       menuEntries.add(
@@ -75,6 +93,22 @@ class AppDrawer extends StatelessWidget {
         title: const Text('Database Tools'),
         onTap: () {
           Get.to(DatabaseToolsScreen());
+        },
+      ),
+    );
+
+    menuEntries.add(
+      ListTile(
+        title: const Text('About Dialog'),
+        onTap: () {
+          showAboutDialog(
+              context: context,
+              applicationIcon: const FlutterLogo(),
+              applicationName: 'Thing Finder',
+              applicationVersion: 'April 2022',
+              applicationLegalese: '\u{a9} 2022 Thing Finder Enterprises',
+              children: aboutBoxChildren,
+            );
         },
       ),
     );
