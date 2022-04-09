@@ -99,7 +99,7 @@ class AppDrawer extends StatelessWidget {
 
     menuEntries.add(
       ListTile(
-        title: const Text('About Dialog'),
+        title: const Text('About'),
         onTap: () {
           showAboutDialog(
               context: context,
