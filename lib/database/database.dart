@@ -76,6 +76,7 @@ class AppDatabase extends _$AppDatabase {
     return await delete(dbContainer).delete(dbContainerData);
   }
 
+  // get specific container
   Future<DbContainerData> getContainer(String containerId) async {
     return await (select(dbContainer)..where((tbl) => tbl.uniqueId.equals(containerId))).getSingle();
   }
@@ -112,6 +113,11 @@ class AppDatabase extends _$AppDatabase {
   // search for items
   Future<List<DbItemData>> searchForItems(String searchText) async {
     return await (select(dbItem)..where((tbl) => tbl.title.like("%" + searchText + "%"))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
+  }
+
+  // get specific item
+  Future<DbItemData> getItem(String itemId) async {
+    return await (select(dbItem)..where((t) => t.uniqueId.equals(itemId))).getSingle();
   }
 
   // get all items in a particular container
