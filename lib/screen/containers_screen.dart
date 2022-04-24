@@ -151,9 +151,6 @@ class _ContainersScreenState extends State<ContainersScreen> {
   }
 
   _navigateToDetail(String title, DbContainerCompanion dbContainerCompanion) async {
-    // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
-    // deleted item will still appear on item screen. would be nice to have it properly
-    // navigate *back* to item/container search with original parameters too
     var res = await Navigator.push(
       context,
       MaterialPageRoute(

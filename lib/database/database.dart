@@ -76,6 +76,11 @@ class AppDatabase extends _$AppDatabase {
     return await delete(dbContainer).delete(dbContainerData);
   }
 
+    // delete container by id
+  Future<int> deleteContainerById(String containerId) async {
+    return await (delete(dbContainer)..where((t) => t.uniqueId.equals(containerId))).go();
+  }
+
   // get specific container
   Future<DbContainerData> getContainer(String containerId) async {
     return await (select(dbContainer)..where((tbl) => tbl.uniqueId.equals(containerId))).getSingle();
@@ -108,6 +113,11 @@ class AppDatabase extends _$AppDatabase {
   // delete item
   Future<int> deleteItem(DbItemData dbItemData) async {
     return await delete(dbItem).delete(dbItemData);
+  }
+
+  // delete item by id
+  Future<int> deleteItemById(String itemId) async {
+    return await (delete(dbItem)..where((t) => t.uniqueId.equals(itemId))).go();
   }
 
   // search for items

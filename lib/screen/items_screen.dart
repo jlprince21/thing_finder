@@ -4,6 +4,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
+import 'package:thing_finder/screen/item_create_screen.dart';
 import 'package:thing_finder/screen/item_detail_screen.dart';
 import 'package:thing_finder/util/app_drawer.dart';
 
@@ -63,11 +64,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _navigateToCreate(
-              'Add Item',
-              const DbItemCompanion(
-                  title: dr.Value(''),
-                  description: dr.Value('')));
+          _navigateToCreate();
         },
         shape: const CircleBorder(
           side: BorderSide(color: Colors.black, width: 2),
@@ -109,7 +106,6 @@ class _ItemsScreenState extends State<ItemsScreen> {
         return InkWell(
           onTap: () {
             _navigateToDetail(
-              'Edit Item',
               DbItemCompanion(
                   uniqueId: dr.Value(dbItemData.uniqueId),
                   title: dr.Value(dbItemData.title),
@@ -158,16 +154,12 @@ class _ItemsScreenState extends State<ItemsScreen> {
     );
   }
 
-  _navigateToDetail(String title, DbItemCompanion dbItemCompanion) async {
-    // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
-    // deleted item will still appear on item screen. would be nice to have it properly
-    // navigate *back* to item/container search with original parameters too
+  _navigateToDetail(DbItemCompanion dbItemCompanion) async {
     var res = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ItemDetailScreen(
-          title: title,
-          dbItemCompanion: dbItemCompanion,
+          itemId: dbItemCompanion.uniqueId.value,
         ),
       ),
     );
@@ -176,17 +168,11 @@ class _ItemsScreenState extends State<ItemsScreen> {
     }
   }
 
-  _navigateToCreate(String title, DbItemCompanion dbItemCompanion) async {
-    // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
-    // deleted item will still appear on item screen. would be nice to have it properly
-    // navigate *back* to item/container search with original parameters too
+  _navigateToCreate() async {
     var res = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ItemDetailScreen(
-          title: title,
-          dbItemCompanion: dbItemCompanion,
-        ),
+        builder: (context) => ItemCreateScreen(),
       ),
     );
     if (res != null && res == true) {

@@ -10,7 +10,8 @@ import 'package:uuid/uuid.dart';
 class ContainerDetailScreen extends StatefulWidget {
   final String title;
   final DbContainerCompanion dbContainerCompanion;
-  const ContainerDetailScreen({Key? key, required this.title, required this.dbContainerCompanion}): super(key: key);
+  const ContainerDetailScreen({Key? key, required this.title, required this.dbContainerCompanion})
+      : super(key: key);
 
   @override
   _ContainerDetailScreenState createState() => _ContainerDetailScreenState();
@@ -63,7 +64,8 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                Get.to(ItemsScreen(searchText: "", containerId: widget.dbContainerCompanion.uniqueId.value));
+                Get.to(ItemsScreen(
+                    searchText: "", containerId: widget.dbContainerCompanion.uniqueId.value));
               },
               child: const Text('View Contents'),
             ),
@@ -78,9 +80,6 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
       elevation: 0,
       leading: IconButton(
         onPressed: () {
-          // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
-          // deleted item will still appear on item screen. would be nice to have it properly
-          // navigate *back* to item/container search with original parameters too
           Navigator.pop(context);
         },
         icon: const Icon(
@@ -121,12 +120,11 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
           .updateContainer(DbContainerData(
               uniqueId: widget.dbContainerCompanion.uniqueId.value,
               title: titleEditingController.text,
-              description: descriptionEditingController.text.isEmpty ? null : descriptionEditingController.text,
+              description: descriptionEditingController.text.isEmpty
+                  ? null
+                  : descriptionEditingController.text,
               date: DateFormat.yMMMd().format(DateTime.now())))
           .then((value) {
-        // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
-        // deleted item will still appear on item screen. would be nice to have it properly
-        // navigate *back* to item/container search with original parameters too
         Navigator.pop(context, true);
       });
     } else {
@@ -137,12 +135,11 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
           .createContainer(DbContainerCompanion(
               uniqueId: dr.Value(id),
               title: dr.Value(titleEditingController.text),
-              description: descriptionEditingController.text.isEmpty ? dr.Value(null) : dr.Value(descriptionEditingController.text),
+              description: descriptionEditingController.text.isEmpty
+                  ? dr.Value(null)
+                  : dr.Value(descriptionEditingController.text),
               date: dr.Value(DateFormat.yMMMd().format(DateTime.now()))))
           .then((value) {
-        // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
-        // deleted item will still appear on item screen. would be nice to have it properly
-        // navigate *back* to item/container search with original parameters too
         Navigator.pop(context, true);
       });
     }
@@ -158,30 +155,16 @@ class _ContainerDetailScreenState extends State<ContainerDetailScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
-                // deleted item will still appear on item screen. would be nice to have it properly
-                // navigate *back* to item/container search with original parameters too
                 Navigator.pop(context);
               },
               child: Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
-                // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
-                // deleted item will still appear on item screen. would be nice to have it properly
-                // navigate *back* to item/container search with original parameters too
                 Navigator.pop(context);
-                // TODO make delete work with just an id
                 appDatabase
-                    .deleteContainer(DbContainerData(
-                        uniqueId: widget.dbContainerCompanion.uniqueId.value,
-                        title: widget.dbContainerCompanion.title.value,
-                        description: widget.dbContainerCompanion.description.value,
-                        date: DateFormat.yMMMd().format(DateTime.now())))
+                    .deleteContainerById(widget.dbContainerCompanion.uniqueId.value)
                     .then((value) {
-                  // TODO 2022-03-20 this needs getx replacement but state doesn't work quite properly eg
-                  // deleted item will still appear on item screen. would be nice to have it properly
-                  // navigate *back* to item/container search with original parameters too
                   Navigator.pop(context, true);
                 });
               },
