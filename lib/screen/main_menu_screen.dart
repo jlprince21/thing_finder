@@ -1,18 +1,12 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/util/app_drawer.dart';
 
-class MainMenuScreen extends StatefulWidget {
-  const MainMenuScreen({Key? key}) : super(key: key);
-
-  @override
-  _MainMenuScreenState createState() => _MainMenuScreenState();
-}
-
-class _MainMenuScreenState extends State<MainMenuScreen> {
+class MainMenuScreen extends StatelessWidget {
   late AppDatabase appDatabase;
+
+  MainMenuScreen();
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +18,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       body: ListView(
           // Important: Remove any padding from the ListView.
           // padding: EdgeInsets.zero,
-          children: AppDrawer.getMenu(context, includeMainMenu: false)
-        ),
+          children: AppDrawer.getMenu(context, includeMainMenu: false)),
     );
   }
 
@@ -36,12 +29,12 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     ));
   }
 
-  _getMainMenuAppBar(){
+  _getMainMenuAppBar() {
     return AppBar(
       // backgroundColor: Colors.white,
       centerTitle: true,
       elevation: 0,
-      title: Text(
+      title: const Text(
         'Main Menu',
         // style: Theme.of(context).textTheme.headline5,
       ),

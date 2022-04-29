@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart' as dr;
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
@@ -8,117 +7,117 @@ import 'package:thing_finder/screen/item_create_screen.dart';
 import 'package:thing_finder/screen/item_detail_screen.dart';
 import 'package:thing_finder/util/app_drawer.dart';
 
-class ItemsScreen extends StatefulWidget {
-  final String searchText;
-  final String containerId;
+class ItemsScreenController extends GetxController {
+  String? searchText;
+  var stuff = <DbItemData>[].obs;
 
-  // TODO 2022-03-19 someday having an enum to get this more manageable with just one
-  // search/filter string would simplify things
-  const ItemsScreen({Key? key, required this.searchText, required this.containerId}) : super(key: key);
+  var axisCount = 2.obs;
 
-  @override
-  _ItemsScreenState createState() => _ItemsScreenState();
+  ItemsScreenController(String theSearchText) {
+    searchText = theSearchText;
+  }
+
+  void setItems(List<DbItemData> data) {
+    stuff.assignAll(data);
+  }
 }
 
-class _ItemsScreenState extends State<ItemsScreen> {
+class ItemsScreen extends StatelessWidget {
   late AppDatabase database;
-  int axisCount = 2;
+  final globalKey = GlobalKey<ScaffoldState>();
+  String? searchText;
+  String? containerId;
+
+  ItemsScreen({@required this.searchText, @required this.containerId});
+
   @override
   Widget build(BuildContext context) {
     database = Provider.of<AppDatabase>(context);
-    return Scaffold(
-      appBar: _getItemsAppBar(),
-      drawer: AppDrawer(),
-      body: FutureBuilder<List<DbItemData>>(
-        future: _getItemsFromDatabase(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            List<DbItemData>? itemList = snapshot.data;
-            if (itemList != null) {
-              if (itemList.isEmpty) {
-                return Center(
-                  child: Text(
-                    'No items found; click on add button to create one.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyText2,
-                  ),
-                );
-              } else {
-                return itemListUI(itemList);
+
+    return GetBuilder<ItemsScreenController>(
+      init: ItemsScreenController(""),
+      builder: (controller) => Scaffold(
+        appBar: _getItemsAppBar(),
+        drawer: AppDrawer(),
+        body: FutureBuilder<List<DbItemData>>(
+          future: _getItemsFromDatabase(searchText, containerId),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              controller.setItems(snapshot.data!);
+              List<DbItemData>? itemList = controller.stuff;
+              if (itemList != null) { // TODO 2022-04-28 this null check *may* be able to be removed along with others like it
+                if (itemList.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No items found; click on add button to create one.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyText2,
+                    ),
+                  );
+                } else {
+                  return itemListUI(controller.stuff, controller.axisCount.value);
+                }
               }
+            } else if (snapshot.hasError) {
+              return Center(
+                  child: Text(
+                snapshot.error.toString(),
+                style: Theme.of(context).textTheme.bodyText2,
+              ));
             }
-          } else if (snapshot.hasError) {
             return Center(
-                child: Text(
-              snapshot.error.toString(),
-              style: Theme.of(context).textTheme.bodyText2,
-            ));
-          }
-          return Center(
-            child: Text(
-              'Click on add button to create new item',
-              style: Theme.of(context).textTheme.bodyText2,
-            ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _navigateToCreate();
-        },
-        shape: const CircleBorder(
-          side: BorderSide(color: Colors.black, width: 2),
+              child: Text(
+                'Click on add button to create new item',
+                style: Theme.of(context).textTheme.bodyText2,
+              ),
+            );
+          },
         ),
-        backgroundColor: Colors.white,
-        child: const Icon(
-          Icons.add,
-          color: Colors.black,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            _navigateToCreate();
+          },
+          shape: const CircleBorder(
+            side: BorderSide(color: Colors.black, width: 2),
+          ),
+          backgroundColor: Colors.white,
+          child: const Icon(
+            Icons.add,
+            color: Colors.black,
+          ),
         ),
       ),
     );
   }
 
-  Future<List<DbItemData>> _getItemsFromDatabase() async {
-    if (widget.searchText.isEmpty == false && widget.containerId.isEmpty)
-    {
-      return await database.searchForItems(widget.searchText);
-    }
-    else if (widget.searchText.isEmpty && widget.containerId.isEmpty == false)
-    {
-      return await database.getContainerContents(widget.containerId);
-    }
-    else
-    {
+  Future<List<DbItemData>> _getItemsFromDatabase(String? searchText, String? containerId) async {
+    if (searchText != null && searchText.isEmpty == false) {
+      return await database.searchForItems(searchText);
+    } else if (containerId != null && containerId.isEmpty == false) {
+      return await database.getContainerContents(containerId);
+    } else {
       return await database.getAllItems();
     }
   }
 
-  Widget itemListUI(List<DbItemData> itemList) {
+  Widget itemListUI(List<DbItemData> itemList, int axisCount) {
     return StaggeredGridView.countBuilder(
       itemCount: itemList.length,
       crossAxisCount: 4,
       staggeredTileBuilder: (index) => StaggeredTile.fit(axisCount),
       mainAxisSpacing: 8,
       crossAxisSpacing: 4,
-      padding: EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.only(top: 10),
       itemBuilder: (context, index) {
         DbItemData dbItemData = itemList[index];
         return InkWell(
           onTap: () {
-            _navigateToDetail(
-              DbItemCompanion(
-                  uniqueId: dr.Value(dbItemData.uniqueId),
-                  title: dr.Value(dbItemData.title),
-                  description: dr.Value(dbItemData.description),
-                  container: dr.Value(dbItemData.container)),
-            );
+            _navigateToDetail(dbItemData.uniqueId);
           },
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 10),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                border: Border.all(color: Colors.black)),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), border: Border.all(color: Colors.black)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -154,53 +153,37 @@ class _ItemsScreenState extends State<ItemsScreen> {
     );
   }
 
-  _navigateToDetail(DbItemCompanion dbItemCompanion) async {
-    var res = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ItemDetailScreen(
-          itemId: dbItemCompanion.uniqueId.value,
-        ),
-      ),
-    );
-    if (res != null && res == true) {
-      setState(() {});
-    }
+  _navigateToDetail(String itemId) async {
+    Get.to(ItemDetailScreen(itemId: itemId));
   }
 
   _navigateToCreate() async {
-    var res = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ItemCreateScreen(),
-      ),
-    );
-    if (res != null && res == true) {
-      setState(() {});
-    }
+    Get.to(ItemCreateScreen());
   }
 
   _getItemsAppBar() {
+    final ItemsScreenController _p = Get.put(ItemsScreenController(""));
+
     return AppBar(
       // backgroundColor: Colors.white,
       centerTitle: true,
       elevation: 0,
-      title: Text(
+      title: const Text(
         'Items',
         // style: Theme.of(context).textTheme.headline5,
       ),
       actions: [
         IconButton(
           onPressed: () {
-            if (axisCount == 2) {
-              axisCount = 4;
+            if (_p.axisCount.value == 2) {
+              _p.axisCount.value = 4;
             } else {
-              axisCount = 2;
+              _p.axisCount.value = 2;
             }
-            setState(() {});
+            _p.update();
           },
           icon: Icon(
-            axisCount == 4 ? Icons.grid_on : Icons.list,
+            _p.axisCount.value == 4 ? Icons.grid_on : Icons.list,
             // color: Colors.black,
           ),
         )

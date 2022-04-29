@@ -1,60 +1,53 @@
-import 'package:drift/drift.dart' as dr;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/screen/container_detail_screen.dart';
+import 'package:thing_finder/screen/items_screen.dart';
 
-class ItemDetailScreen extends StatefulWidget {
-  final String? itemId;
-  const ItemDetailScreen({Key? key, required this.itemId}) : super(key: key);
+class ItemDetailScreenController extends GetxController {
+  var titleEditingController = TextEditingController();
+  var descriptionEditingController = TextEditingController();
+  DbContainerData? currentContainer;
+  String? selectedContainer = null;
 
   @override
-  _ItemDetailScreenState createState() => _ItemDetailScreenState();
+  void dispose() {
+    titleEditingController.dispose();
+    descriptionEditingController.dispose();
+    super.dispose();
+  }
 }
 
-class _ItemDetailScreenState extends State<ItemDetailScreen> {
+class ItemDetailScreen extends StatelessWidget {
   late AppDatabase appDatabase;
-  late TextEditingController titleEditingController;
-  late TextEditingController descriptionEditingController;
-  late String? selectedContainer;
-  late DbContainerData? currentContainer;
-  late DbItemData? theItem;
+  String itemId;
 
-  @override
-  void initState() {
-    titleEditingController = TextEditingController();
-    descriptionEditingController = TextEditingController();
-
-    selectedContainer = null;
-    currentContainer = null;
-    theItem = null;
-    super.initState();
-  }
+  ItemDetailScreen({required this.itemId});
 
   @override
   Widget build(BuildContext context) {
     appDatabase = Provider.of<AppDatabase>(context);
+    final controller = Get.put(ItemDetailScreenController());
 
     return Scaffold(
-      appBar: _getDetailAppBar(),
+      appBar: _getDetailAppBar(context, controller, itemId),
       body: FutureBuilder(
-        future: appDatabase.getItem(widget.itemId ?? ""),
+        future: appDatabase.getItem(itemId),
         builder: (context, AsyncSnapshot<DbItemData> snapshot) {
           if (snapshot.hasData) {
-            theItem = snapshot.data;
-
-            titleEditingController.text = theItem!.title;
-            descriptionEditingController.text = theItem!.description ?? "";
+            var theItem = snapshot.data;
+            controller.titleEditingController.text = theItem!.title;
+            controller.descriptionEditingController.text = theItem.description ?? "";
 
             return FutureBuilder(
-                future: appDatabase.getContainer(theItem?.container ?? ""),
+                future: appDatabase.getContainer(theItem.container ?? ""),
                 builder: (context, AsyncSnapshot<DbContainerData> snapshot) {
                   if (snapshot.hasData) {
-                    currentContainer = snapshot.data;
+                    controller.currentContainer = snapshot.data;
                   } else {
-                    currentContainer = null;
+                    controller.currentContainer = null;
                   }
 
                   return Container(
@@ -74,7 +67,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                           title: "(No Container)",
                                           date: "2022-01-01",
                                           description: "(No Container)"));
-                                  return containerListPicker(containerList);
+                                  return containerListPicker(containerList, controller);
                                 }
                               } else if (snapshot.hasError) {
                                 return Center(
@@ -92,7 +85,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                             },
                           ),
                           TextFormField(
-                            controller: titleEditingController,
+                            controller: controller.titleEditingController,
                             decoration: InputDecoration(
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(5),
@@ -103,7 +96,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                             height: 20,
                           ),
                           TextFormField(
-                            controller: descriptionEditingController,
+                            controller: controller.descriptionEditingController,
                             maxLength: 100,
                             minLines: 4,
                             maxLines: 6,
@@ -113,18 +106,12 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                 ),
                                 hintText: 'Item Description'),
                           ),
-                          if (currentContainer != null) ...[
-                            Text("Inside container: " + currentContainer!.title),
+                          if (controller.currentContainer != null) ...[
+                            Text("Inside container: " + controller.currentContainer!.title),
                             ElevatedButton(
                               onPressed: () {
-                                // TODO 2022-03-19 another great place demonstrating need to use container id instead lol
-                                Get.to(ContainerDetailScreen(
-                                    title: 'Edit Container',
-                                    dbContainerCompanion: DbContainerCompanion(
-                                        date: dr.Value(currentContainer!.date),
-                                        description: dr.Value(currentContainer!.description),
-                                        title: dr.Value(currentContainer!.title),
-                                        uniqueId: dr.Value(currentContainer!.uniqueId))));
+                                Get.delete<ItemDetailScreen>();
+                                Get.to(ContainerDetailScreen(containerId: controller.currentContainer!.uniqueId));
                               },
                               child: const Text('Go to Container'),
                             ),
@@ -133,30 +120,30 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       ));
                 });
           } else {
-            return Text('Something went wrong finding the item :(.');
+            return const Text('Something went wrong finding the item :(.');
           }
         },
       ),
     );
   }
 
-  Widget containerListPicker(List<DbContainerData> containerList) {
+  Widget containerListPicker(List<DbContainerData> containerList, ItemDetailScreenController controller) {
     return DropdownButtonFormField<DbContainerData>(
-      value: currentContainer ?? containerList[0],
+      value: controller.currentContainer ?? containerList[0],
       decoration: const InputDecoration(
         icon: Icon(Icons.widgets),
         hintText: 'Select container',
         labelText: 'Container *',
       ),
-      icon: Icon(Icons.arrow_downward),
+      icon: const Icon(Icons.arrow_downward),
       iconSize: 24,
       elevation: 16,
-      style: TextStyle(color: Colors.deepPurple),
+      style: const TextStyle(color: Colors.deepPurple),
       onChanged: (DbContainerData? newValue) {
         if (newValue?.uniqueId == "no-container") {
-          selectedContainer = null;
+          controller.selectedContainer = null;
         } else {
-          selectedContainer = newValue?.uniqueId;
+          controller.selectedContainer = newValue?.uniqueId;
         }
       },
       items: containerList.map((DbContainerData container) {
@@ -164,12 +151,12 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           value: container,
           child: Row(
             children: <Widget>[
-              SizedBox(
+              const SizedBox(
                 width: 10,
               ),
               Text(
                 container.title,
-                style: TextStyle(color: Colors.black),
+                style: const TextStyle(color: Colors.black),
               ),
             ],
           ),
@@ -178,7 +165,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     );
   }
 
-  _getDetailAppBar() {
+  _getDetailAppBar(BuildContext context, ItemDetailScreenController controller, String itemId) {
     return AppBar(
       elevation: 0,
       leading: IconButton(
@@ -190,14 +177,18 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           // color: Colors.black,
         ),
       ),
-      title: Text(
+      title: const Text(
         "Edit Item",
         // style: const TextStyle(color: Colors.black),
       ),
       actions: [
         IconButton(
           onPressed: () {
-            _saveToDb();
+            _saveToDb(
+                itemId,
+                controller.selectedContainer == null ? "" : controller.selectedContainer!,
+                controller.titleEditingController.text,
+                controller.descriptionEditingController.text);
           },
           icon: const Icon(
             Icons.save,
@@ -206,7 +197,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         ),
         IconButton(
           onPressed: () {
-            _deleteItem();
+            _deleteItem(context, itemId);
           },
           icon: const Icon(
             Icons.delete,
@@ -221,43 +212,43 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     return await appDatabase.getAllContainers();
   }
 
-  void _saveToDb() {
+  void _saveToDb(String itemId, String containerId, String title, String description) {
     appDatabase
         .updateItem(DbItemData(
-            uniqueId: theItem!.uniqueId,
-            title: titleEditingController.text,
-            description: descriptionEditingController.text.isEmpty
-                ? null
-                : descriptionEditingController.text,
+            uniqueId: itemId,
+            title: title,
+            description: description.isEmpty ? null : description,
             date: DateFormat.yMMMd().format(DateTime.now()),
-            container: selectedContainer))
+            container: containerId.isEmpty ? null : containerId))
         .then((value) {
-      Navigator.pop(context, true);
-    });
+      Get.delete<ItemDetailScreenController>(); // important. resets controller so values aren't retained
+      Get.to(ItemsScreen(searchText: "", containerId: ""));
+    },);
   }
 
-  void _deleteItem() {
+  void _deleteItem(BuildContext theContext, String itemId) {
     showDialog(
-      context: context,
+      context: theContext,
       builder: (context) {
         return AlertDialog(
-          title: Text('Delete Confirmation'),
-          content: Text('Do you really want to delete this?'),
+          title: const Text('Delete Confirmation'),
+          content: const Text('Do you really want to delete this?'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                appDatabase.deleteItemById(theItem!.uniqueId).then((value) {
-                  Navigator.pop(context, true);
+                appDatabase.deleteItemById(itemId).then((value) {
+                  Get.delete<ItemDetailScreenController>(); // important. resets controller so values aren't retained
+                  Get.to(ItemsScreen(searchText: "", containerId: ""));
                 });
               },
-              child: Text('Delete'),
+              child: const Text('Delete'),
             ),
           ],
         );

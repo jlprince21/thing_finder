@@ -11,15 +11,10 @@ import 'package:share_plus/share_plus.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/util/app_drawer.dart';
 
-class DatabaseToolsScreen extends StatefulWidget {
-  const DatabaseToolsScreen({Key? key}) : super(key: key);
-
-  @override
-  _DatabaseToolsScreenState createState() => _DatabaseToolsScreenState();
-}
-
-class _DatabaseToolsScreenState extends State<DatabaseToolsScreen> {
+class DatabaseToolsScreen extends StatelessWidget {
   late AppDatabase appDatabase;
+
+  DatabaseToolsScreen();
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +32,7 @@ class _DatabaseToolsScreenState extends State<DatabaseToolsScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
-                    child: Text('Export DB'),
+                    child: const Text('Export DB'),
                     onPressed: () {
                       exportDatabase();
                     },
@@ -48,7 +43,7 @@ class _DatabaseToolsScreenState extends State<DatabaseToolsScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
-                    child: Text('Import Items to DB'),
+                    child: const Text('Import Items to DB'),
                     onPressed: () {
                       _pickFile("item");
                     },
@@ -59,7 +54,7 @@ class _DatabaseToolsScreenState extends State<DatabaseToolsScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
-                    child: Text('Import Containers to DB'),
+                    child: const Text('Import Containers to DB'),
                     onPressed: () {
                       _pickFile("container");
                     },
@@ -85,7 +80,7 @@ class _DatabaseToolsScreenState extends State<DatabaseToolsScreen> {
       // backgroundColor: Colors.white,
       centerTitle: true,
       elevation: 0,
-      title: Text(
+      title: const Text(
         'Database Tools',
         // style: Theme.of(context).textTheme.headline5,
       ),

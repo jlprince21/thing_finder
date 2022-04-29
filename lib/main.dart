@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       child: GetMaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Thing Finder',
-        home: const MainMenuScreen()
+        home: MainMenuScreen()
       ),
       dispose: (context, db) => db.close(),
     );

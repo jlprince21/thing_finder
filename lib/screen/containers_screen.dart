@@ -1,37 +1,59 @@
-import 'package:drift/drift.dart' as dr;
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
+import 'package:thing_finder/screen/container_create_screen.dart';
 import 'package:thing_finder/screen/container_detail_screen.dart';
 import 'package:thing_finder/util/app_drawer.dart';
 
-class ContainersScreen extends StatefulWidget {
-  final String searchText;
+class ContainersScreenController extends GetxController {
+  String? searchText;
+  var stuff = <DbContainerData>[].obs;
 
-  const ContainersScreen({Key? key, required this.searchText}) : super(key: key);
+  var axisCount = 2.obs;
 
-  @override
-  _ContainersScreenState createState() => _ContainersScreenState();
+  ContainersScreenController(String theSearchText) {
+    searchText = theSearchText;
+  }
+
+  void setContainers(List<DbContainerData> data) {
+    stuff.assignAll(data);
+  }
 }
 
-class _ContainersScreenState extends State<ContainersScreen> {
+class ContainersScreen extends StatelessWidget {
   late AppDatabase database;
-  int axisCount = 2;
+  final globalKey = GlobalKey<ScaffoldState>();
+  String? searchText;
+
+  ContainersScreen({@required this.searchText});
+
   @override
   Widget build(BuildContext context) {
     database = Provider.of<AppDatabase>(context);
-    return Scaffold(
-      appBar: _getContainersAppBar(),
-      drawer: AppDrawer(),
-      body: FutureBuilder<List<DbContainerData>>(
-        future: _getContainersFromDatabase(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            List<DbContainerData>? containerList = snapshot.data;
-            if (containerList != null) {
-              if (containerList.isEmpty) {
+
+    return GetBuilder<ContainersScreenController>(
+      init: ContainersScreenController(""),
+      builder: (controller) => Scaffold(
+        appBar: _getContainersAppBar(context),
+        drawer: AppDrawer(),
+        key: globalKey, // TODO still need globalkey?
+        body: Center(
+          child: FutureBuilder<List<DbContainerData>>(
+            future: _getContainersFromDatabase(searchText),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'Error: ' + snapshot.error.toString(),
+                    style: Theme.of(context).textTheme.bodyText2,
+                  ),
+                );
+              } else if (snapshot.hasData && snapshot.data!.length > 0) {
+                controller.setContainers(snapshot.data!);
+                return containerListUI(controller.stuff, controller.axisCount.value);
+              } else {
                 return Center(
                   child: Text(
                     'No containers found; click on add button to create one.',
@@ -39,57 +61,36 @@ class _ContainersScreenState extends State<ContainersScreen> {
                     style: Theme.of(context).textTheme.bodyText2,
                   ),
                 );
-              } else {
-                return containerListUI(containerList);
               }
-            }
-          } else if (snapshot.hasError) {
-            return Center(
-                child: Text(
-              snapshot.error.toString(),
-              style: Theme.of(context).textTheme.bodyText2,
-            ));
-          }
-          return Center(
-            child: Text(
-              'Click on add button to create new container',
-              style: Theme.of(context).textTheme.bodyText2,
-            ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _navigateToDetail(
-              'Add Container',
-              const DbContainerCompanion(
-                  title: dr.Value(''),
-                  description: dr.Value('')));
-        },
-        shape: const CircleBorder(
-          side: BorderSide(color: Colors.black, width: 2),
+            },
+          ),
         ),
-        backgroundColor: Colors.white,
-        child: const Icon(
-          Icons.add,
-          color: Colors.black,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            _navigateToCreate();
+          },
+          shape: const CircleBorder(
+            side: BorderSide(color: Colors.black, width: 2),
+          ),
+          backgroundColor: Colors.white,
+          child: const Icon(
+            Icons.add,
+            color: Colors.black,
+          ),
         ),
       ),
     );
   }
 
-  Future<List<DbContainerData>> _getContainersFromDatabase() async {
-    if (widget.searchText.isEmpty)
-    {
+  Future<List<DbContainerData>> _getContainersFromDatabase(String? searchText) async {
+    if (searchText == null || searchText.isEmpty) {
       return await database.getAllContainers();
-    }
-    else
-    {
-      return await database.searchForContainers(widget.searchText);
+    } else {
+      return await database.searchForContainers(searchText);
     }
   }
 
-  Widget containerListUI(List<DbContainerData> containerList) {
+  Widget containerListUI(List<DbContainerData> containerList, int axisCount) {
     return StaggeredGridView.countBuilder(
       itemCount: containerList.length,
       crossAxisCount: 4,
@@ -101,20 +102,12 @@ class _ContainersScreenState extends State<ContainersScreen> {
         DbContainerData dbContainerData = containerList[index];
         return InkWell(
           onTap: () {
-            _navigateToDetail(
-              'Edit Container',
-              DbContainerCompanion(
-                  uniqueId: dr.Value(dbContainerData.uniqueId),
-                  title: dr.Value(dbContainerData.title),
-                  description: dr.Value(dbContainerData.description)),
-            );
+            _navigateToDetail(dbContainerData.uniqueId);
           },
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 10),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                border: Border.all(color: Colors.black)),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), border: Border.all(color: Colors.black)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -150,42 +143,37 @@ class _ContainersScreenState extends State<ContainersScreen> {
     );
   }
 
-  _navigateToDetail(String title, DbContainerCompanion dbContainerCompanion) async {
-    var res = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ContainerDetailScreen(
-          title: title,
-          dbContainerCompanion: dbContainerCompanion,
-        ),
-      ),
-    );
-    if (res != null && res == true) {
-      setState(() {});
-    }
+  _navigateToCreate() {
+    Get.to(ContainerCreateScreen());
   }
 
-  _getContainersAppBar() {
+  _navigateToDetail(String containerId) async {
+    Get.to(ContainerDetailScreen(containerId: containerId));
+  }
+
+  _getContainersAppBar(BuildContext context) {
+    final ContainersScreenController _p = Get.put(ContainersScreenController(""));
+
     return AppBar(
       // backgroundColor: Colors.white,
       centerTitle: true,
       elevation: 0,
-      title: Text(
+      title: const Text(
         'Containers',
         // style: Theme.of(context).textTheme.headline5,
       ),
       actions: [
         IconButton(
           onPressed: () {
-            if (axisCount == 2) {
-              axisCount = 4;
+            if (_p.axisCount.value == 2) {
+              _p.axisCount.value = 4;
             } else {
-              axisCount = 2;
+              _p.axisCount.value = 2;
             }
-            setState(() {});
+            _p.update();
           },
           icon: Icon(
-            axisCount == 4 ? Icons.grid_on : Icons.list,
+            _p.axisCount.value == 4 ? Icons.grid_on : Icons.list,
             // color: Colors.black,
           ),
         )
