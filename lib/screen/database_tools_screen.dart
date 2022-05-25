@@ -61,6 +61,29 @@ class DatabaseToolsScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    child: const Text('Import Indexes to DB'),
+                    onPressed: () {
+                      _pickFile("index");
+                    },
+                  ),
+                ),
+              ),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    child: const Text('Import Locations to DB'),
+                    onPressed: () {
+                      _pickFile("location");
+                    },
+                  ),
+                ),
+              ),
+
             ],
           ),
         ),
@@ -87,30 +110,6 @@ class DatabaseToolsScreen extends StatelessWidget {
     );
   }
 
-  _createItem(String line) {
-    // TODO using a CSV parser may make this easier
-    final split = line.split('|');
-    final Map<int, String> values = {
-      for (int i = 0; i < split.length; i++)
-        i: split[i]
-    };
-    print(values);
-
-    final itemId = values[0];
-    final containerId = values[1];
-    final itemTitle = values[2];
-    final itemDescription = values[3];
-    final itemDate = values[4];
-
-    appDatabase
-      .createItem(DbItemCompanion(
-        uniqueId: dr.Value(itemId!),
-        title: dr.Value(itemTitle!),
-        description: itemDescription == null ? dr.Value(null) : dr.Value(itemDescription),
-        date: dr.Value(itemDate!),
-        container: dr.Value(containerId)));
-  }
-
   _createContainer(String line) {
     // TODO using a CSV parser may make this easier
     final split = line.split('|');
@@ -126,7 +125,7 @@ class DatabaseToolsScreen extends StatelessWidget {
     final containerDate = values[3];
 
     appDatabase
-      .createContainer(DbContainerCompanion(
+      .importContainer(DbContainerCompanion(
         uniqueId: dr.Value(containerId!),
         title: dr.Value(containerTitle!),
         description: containerDescription == null ? dr.Value(null) : dr.Value(containerDescription),
@@ -134,14 +133,78 @@ class DatabaseToolsScreen extends StatelessWidget {
         ));
   }
 
-  _pickFile(String itemOrContainer) async {
+  _createIndex(String line) {
+    // TODO using a CSV parser may make this easier
+    final split = line.split('|');
+    final Map<int, String> values = {
+      for (int i = 0; i < split.length; i++)
+        i: split[i]
+    };
+    print(values);
+
+    final indexId = values[0];
+    final type = int.tryParse(values[1]!); // TODO 2022-05-21 risky code here
+
+    appDatabase
+      .importType(DbIndexCompanion(
+        uniqueId: dr.Value(indexId!),
+        type: dr.Value(type!),
+        ));
+  }
+
+  _createItem(String line) {
+    // TODO using a CSV parser may make this easier
+    final split = line.split('|');
+    final Map<int, String> values = {
+      for (int i = 0; i < split.length; i++)
+        i: split[i]
+    };
+    print(values);
+
+    final itemId = values[0];
+    final itemTitle = values[1];
+    final itemDescription = values[2];
+    final itemDate = values[3];
+
+    appDatabase.importItem(DbItemCompanion(
+      uniqueId: dr.Value(itemId!),
+      title: dr.Value(itemTitle!),
+      description: itemDescription == null ? dr.Value(null) : dr.Value(itemDescription),
+      date: dr.Value(itemDate!),
+    ));
+  }
+
+  _createLocation(String line) {
+    // TODO using a CSV parser may make this easier
+    final split = line.split('|');
+    final Map<int, String> values = {
+      for (int i = 0; i < split.length; i++)
+        i: split[i]
+    };
+    print(values);
+
+    final uniqueId = values[0];
+    final objectId = values[1];
+    final insideId = values[2];
+    final date = values[3];
+
+    appDatabase
+      .importLocation(DbLocationCompanion(
+        uniqueId: dr.Value(uniqueId!),
+        objectId: dr.Value(objectId!),
+        insideId: insideId == null ? dr.Value(null) : dr.Value(insideId),
+        date: dr.Value(date!),
+        ));
+  }
+
+  _pickFile(String importType) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result != null) {
       File file = File(result.files.single.path!);
       print("path: " + file.path);
 
-      if (itemOrContainer == "item")
+      if (importType == "item")
       {
         new File(file.path)
           .openRead()
@@ -149,13 +212,29 @@ class DatabaseToolsScreen extends StatelessWidget {
           .transform(new LineSplitter())
           .forEach((l) => _createItem(l));
       }
-      else if (itemOrContainer == "container")
+      else if (importType == "container")
       {
         new File(file.path)
           .openRead()
           .transform(utf8.decoder)
           .transform(new LineSplitter())
           .forEach((l) => _createContainer(l));
+      }
+      else if (importType == "location")
+      {
+        new File(file.path)
+          .openRead()
+          .transform(utf8.decoder)
+          .transform(new LineSplitter())
+          .forEach((l) => _createLocation(l));
+      }
+      else if (importType == "index")
+      {
+        new File(file.path)
+          .openRead()
+          .transform(utf8.decoder)
+          .transform(new LineSplitter())
+          .forEach((l) => _createIndex(l));
       }
 
     } else {

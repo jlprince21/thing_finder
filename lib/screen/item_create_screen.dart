@@ -1,11 +1,8 @@
-import 'package:drift/drift.dart' as dr;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/screen/items_screen.dart';
-import 'package:uuid/uuid.dart';
 
 class ItemCreateScreenController extends GetxController {
   var titleEditingController = TextEditingController();
@@ -167,16 +164,11 @@ class ItemCreateScreen extends StatelessWidget {
   }
 
   void _saveToDb(String title, String description, String? containerId) {
-    var uuid = const Uuid();
-    var id = uuid.v4();
-
     appDatabase
-        .createItem(DbItemCompanion(
-            uniqueId: dr.Value(id),
-            title: dr.Value(title),
-            description: description.isEmpty ? dr.Value(null) : dr.Value(description),
-            date: dr.Value(DateFormat.yMMMd().format(DateTime.now())),
-            container: dr.Value(containerId)))
+        .createItem(
+            title,
+            description,
+            containerId)
         .then((value) {
       Get.delete<ItemCreateScreenController>(); // important. resets controller so values aren't retained after creating an item and making another
       Get.to(ItemsScreen(searchText: "", containerId: ""));

@@ -112,7 +112,7 @@ class ItemsScreen extends StatelessWidget {
         DbItemData dbItemData = itemList[index];
         return InkWell(
           onTap: () {
-            _navigateToDetail(dbItemData.uniqueId);
+            _navigateToDetail(dbItemData.uniqueId ?? ""); // TODO this is messy
           },
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 10),

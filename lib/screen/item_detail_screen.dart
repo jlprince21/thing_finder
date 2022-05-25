@@ -35,17 +35,18 @@ class ItemDetailScreen extends StatelessWidget {
       appBar: _getDetailAppBar(context, controller, itemId),
       body: FutureBuilder(
         future: appDatabase.getItem(itemId),
-        builder: (context, AsyncSnapshot<DbItemData> snapshot) {
+        builder: (context, AsyncSnapshot<ItemMapped> snapshot) {
           if (snapshot.hasData) {
             var theItem = snapshot.data;
-            controller.titleEditingController.text = theItem!.title;
-            controller.descriptionEditingController.text = theItem.description ?? "";
+            controller.titleEditingController.text = theItem!.item.title;
+            controller.descriptionEditingController.text = theItem.item.description ?? "";
 
             return FutureBuilder(
-                future: appDatabase.getContainer(theItem.container ?? ""),
+                future: appDatabase.getContainer(theItem.container?.uniqueId ?? ""),
                 builder: (context, AsyncSnapshot<DbContainerData> snapshot) {
                   if (snapshot.hasData) {
                     controller.currentContainer = snapshot.data;
+                    controller.selectedContainer = snapshot.data!.uniqueId;
                   } else {
                     controller.currentContainer = null;
                   }
@@ -111,7 +112,7 @@ class ItemDetailScreen extends StatelessWidget {
                             ElevatedButton(
                               onPressed: () {
                                 Get.delete<ItemDetailScreen>();
-                                Get.to(ContainerDetailScreen(containerId: controller.currentContainer!.uniqueId));
+                                Get.to(ContainerDetailScreen(containerId: controller.currentContainer!.uniqueId!));
                               },
                               child: const Text('Go to Container'),
                             ),
@@ -218,8 +219,8 @@ class ItemDetailScreen extends StatelessWidget {
             uniqueId: itemId,
             title: title,
             description: description.isEmpty ? null : description,
-            date: DateFormat.yMMMd().format(DateTime.now()),
-            container: containerId.isEmpty ? null : containerId))
+            date: DateFormat.yMMMd().format(DateTime.now())),
+            containerId.isEmpty ? null : containerId)
         .then((value) {
       Get.delete<ItemDetailScreenController>(); // important. resets controller so values aren't retained
       Get.to(ItemsScreen(searchText: "", containerId: ""));

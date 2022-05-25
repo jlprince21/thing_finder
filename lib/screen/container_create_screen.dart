@@ -1,11 +1,9 @@
 import 'package:drift/drift.dart' as dr;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/screen/containers_screen.dart';
-import 'package:uuid/uuid.dart';
 
 class ContainerCreateScreenController extends GetxController {
   var titleEditingController = TextEditingController();
@@ -94,15 +92,11 @@ class ContainerCreateScreen extends StatelessWidget {
   }
 
   void _saveToDb(String title, String description) {
-    var uuid = const Uuid();
-    var id = uuid.v4();
-
     appDatabase
-        .createContainer(DbContainerCompanion(
-            uniqueId: dr.Value(id),
-            title: dr.Value(title),
-            description: description.isEmpty ? dr.Value(null) : dr.Value(description),
-            date: dr.Value(DateFormat.yMMMd().format(DateTime.now()))))
+        .createContainer(
+            title,
+            description
+            )
         .then((value) {
       Get.delete<ContainerCreateScreenController>(); // important. resets controller so values aren't retained after creating a container and making another
       Get.to(ContainersScreen(searchText: ""));

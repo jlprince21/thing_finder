@@ -147,8 +147,8 @@ class ContainersScreen extends StatelessWidget {
     Get.to(ContainerCreateScreen());
   }
 
-  _navigateToDetail(String containerId) async {
-    Get.to(ContainerDetailScreen(containerId: containerId));
+  _navigateToDetail(String? containerId) async {
+    Get.to(ContainerDetailScreen(containerId: containerId!));
   }
 
   _getContainersAppBar(BuildContext context) {

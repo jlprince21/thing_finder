@@ -2,30 +2,48 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:uuid/uuid.dart';
 
 part 'database.g.dart';
 
 class DbContainer extends Table {
-  TextColumn get uniqueId => text()();
+  TextColumn get uniqueId => text().references(DbIndex, #uniqueId)();
   TextColumn get title => text()();
   TextColumn get description => text().nullable().named('description')();
   TextColumn get date => text()();
 
-  // designates the primary key for the table
+  @override
+  Set<Column> get primaryKey => {uniqueId};
+}
+
+// Using just an id you can look up what it refers to eg 0 = item, 1 = container, etc
+class DbIndex extends Table {
+  TextColumn get uniqueId => text()();
+  IntColumn get type => integer()();
+
   @override
   Set<Column> get primaryKey => {uniqueId};
 }
 
 class DbItem extends Table {
-  TextColumn get uniqueId => text()();
-  TextColumn get container => text().nullable().references(DbContainer, #uniqueId)();
+  TextColumn get uniqueId => text().references(DbIndex, #uniqueId)();
   TextColumn get title => text()();
   TextColumn get description => text().nullable().named('description')();
   TextColumn get date => text()();
 
-  // designates the primary key for the table
+  @override
+  Set<Column> get primaryKey => {uniqueId};
+}
+
+class DbLocation extends Table {
+  TextColumn get uniqueId => text()();
+  TextColumn get objectId => text().nullable().references(DbIndex, #uniqueId)();
+  TextColumn get insideId => text().nullable().references(DbIndex, #uniqueId)();
+  TextColumn get date => text()();
+
   @override
   Set<Column> get primaryKey => {uniqueId};
 }
@@ -39,20 +57,63 @@ LazyDatabase _openConnection() {
   });
 }
 
-@DriftDatabase(tables: [DbContainer, DbItem])
+@DriftDatabase(tables: [DbContainer, DbIndex, DbItem, DbLocation])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
   int get schemaVersion => 1;
 
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      beforeOpen: (details) async {
+        // sample Drift code
+        // if (details.wasCreated) {
+        // }
+
+        // needed to activate foreign keys as sqlite3 doesn't have them by default
+        await customStatement('PRAGMA foreign_keys = ON');
+      },
+      onCreate: (Migrator m) async {
+        await m.createAll();
+      },
+      onUpgrade: (Migrator m, int from, int to) async {
+        // sample Drift code
+        // if (from < 2) {
+        //   // we added the dueDate property in the change from version 1 to
+        //   // version 2
+        //   await m.addColumn(todos, todos.dueDate);
+        // }
+        // if (from < 3) {
+        //   // we added the priority property in the change from version 1 or 2
+        //   // to version 3
+        //   await m.addColumn(todos, todos.priority);
+        // }
+      },
+    );
+  }
+
   /* ---------------------------------------------------------------------------
    * Containers
    * -------------------------------------------------------------------------*/
 
-  // create new container
-  Future<int> createContainer(DbContainerCompanion dbContainerCompanion) async {
+  // import container
+  Future<int> importContainer(DbContainerCompanion dbContainerCompanion) async {
     return await into(dbContainer).insert(dbContainerCompanion);
+  }
+
+  // create new container
+  Future<int> createContainer(String title, String? description) async {
+    var uuid = const Uuid();
+    var id = uuid.v4();
+    var date = DateFormat.yMMMd().format(DateTime.now());
+
+    // insert into type table
+    await into(dbIndex).insert(DbIndexCompanion(uniqueId: Value(id), type: Value(1)));
+
+    // insert into container table
+    return await into(dbContainer).insert(DbContainerCompanion(date: Value(date), description: Value(description), title: Value(title), uniqueId: Value(id)));
   }
 
   // retrieve all containers
@@ -66,19 +127,22 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // delete container
-  Future<int> deleteContainer(DbContainerData dbContainerData) async {
-    (update(dbItem)
-      ..where((t) => t.container.equals(dbContainerData.uniqueId))
-    ).write(DbItemCompanion(
-      container: Value(null),
-    ));
+  // Future<int> deleteContainer(DbContainerData dbContainerData) async {
+  //   (update(dbItem)
+  //     ..where((t) => t.container.equals(dbContainerData.uniqueId))
+  //   ).write(DbItemCompanion(
+  //     container: Value(null),
+  //   ));
 
-    return await delete(dbContainer).delete(dbContainerData);
-  }
+  //   return await delete(dbContainer).delete(dbContainerData);
+  // }
 
-    // delete container by id
+  // delete container by id
   Future<int> deleteContainerById(String containerId) async {
-    return await (delete(dbContainer)..where((t) => t.uniqueId.equals(containerId))).go();
+    await (delete(dbContainer)..where((t) => t.uniqueId.equals(containerId))).go();
+    await (update(dbLocation)..where((t) => t.insideId.equals(containerId))).write(DbLocationCompanion(insideId: Value(null))); // item in container
+    await (update(dbLocation)..where((t) => t.objectId.equals(containerId))).write(DbLocationCompanion(insideId: Value(null))); // container in a location (future plans) TODO should this be a delete instead?
+    return await (delete(dbIndex)..where((t) => t.uniqueId.equals(containerId))).go();
   }
 
   // get specific container
@@ -95,9 +159,26 @@ class AppDatabase extends _$AppDatabase {
    * Items
    * -------------------------------------------------------------------------*/
 
-  // create new item
-  Future<int> createItem(DbItemCompanion dbItemCompanion) async {
+  // import item
+  Future<int> importItem(DbItemCompanion dbItemCompanion) async {
     return await into(dbItem).insert(dbItemCompanion);
+  }
+
+  // create new item
+  Future<int> createItem(String title, String? description, String? containerId) async {
+    var uuid = const Uuid();
+    var id = uuid.v4();
+    var date = DateFormat.yMMMd().format(DateTime.now());
+
+    // insert into type table
+    await into(dbIndex).insert(DbIndexCompanion(uniqueId: Value(id), type: Value(0)));
+
+    // insert into item table
+    await into(dbItem).insert(DbItemCompanion(date: Value(date), description: Value(description), title: Value(title), uniqueId: Value(id)));
+
+    // make mapping in location table
+    // TODO 2022-05-18 probably need to check if container id exists and make sure a null gets put in map if none passed in
+    return await into(dbLocation).insert(DbLocationCompanion(date: Value(date), objectId: Value(id), insideId: Value(containerId), uniqueId: Value(uuid.v4())));
   }
 
   // retrieve all items
@@ -106,18 +187,34 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // update item
-  Future<bool> updateItem(DbItemData dbItemData) async {
-    return await update(dbItem).replace(dbItemData);
+  // Future<bool> updateItem(DbItemData dbItemData) async {
+  //   return await update(dbItem).replace(dbItemData);
+  // }
+
+  // update item
+  Future<bool> updateItem(DbItemData dbItemData, String? containerId) async {
+    await update(dbItem).replace(dbItemData);
+
+    var theMap = await  (select(dbLocation)..where((t) => t.objectId.equals(dbItemData.uniqueId))).getSingle();
+
+    return await update(dbLocation).replace(DbLocationData(date: DateFormat.yMMMd().format(DateTime.now()), uniqueId: theMap.uniqueId, insideId: containerId, objectId: dbItemData.uniqueId));
   }
 
   // delete item
-  Future<int> deleteItem(DbItemData dbItemData) async {
-    return await delete(dbItem).delete(dbItemData);
-  }
+  // Future<int> deleteItem(DbItemData dbItemData) async {
+  //   return await delete(dbItem).delete(dbItemData);
+  // }
+
+  // delete item by id
+  // Future<int> deleteItemById(String itemId) async {
+  //   return await (delete(dbItem)..where((t) => t.uniqueId.equals(itemId))).go();
+  // }
 
   // delete item by id
   Future<int> deleteItemById(String itemId) async {
-    return await (delete(dbItem)..where((t) => t.uniqueId.equals(itemId))).go();
+    await (delete(dbItem)..where((t) => t.uniqueId.equals(itemId))).go();
+    await (delete(dbLocation)..where((t) => t.objectId.equals(itemId))).go();
+    return await (delete(dbIndex)..where((t) => t.uniqueId.equals(itemId))).go();
   }
 
   // search for items
@@ -126,12 +223,76 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // get specific item
-  Future<DbItemData> getItem(String itemId) async {
-    return await (select(dbItem)..where((t) => t.uniqueId.equals(itemId))).getSingle();
+  // Future<DbItemData> getItem(String itemId) async {
+  //   print('get item');
+  //   return await (select(dbItem)..where((t) => t.uniqueId.equals(itemId))).getSingle();
+  // }
+
+  // get specific item with enough data needed for the item details screen
+  Future<ItemMapped> getItem(String itemId) async {
+    // TODO 2022-05-17 try Drift join syntax someday...
+    var theItem = await (select(dbItem)..where((t) => t.uniqueId.equals(itemId))).getSingle();
+    var theMap = await  (select(dbLocation)..where((t) => t.objectId.equals(itemId))).getSingle();
+
+    DbContainerData? theContainer;
+    if (theMap != null && theMap.insideId != null)
+    {
+      theContainer = await  (select(dbContainer)..where((t) => t.uniqueId.equals(theMap.insideId))).getSingle();
+    }
+
+    var results = ItemMapped(theItem, theMap, theContainer);
+    return results;
   }
+
+  /* ---------------------------------------------------------------------------
+   * Locations
+   * -------------------------------------------------------------------------*/
+
+  // import location
+  Future<int> importLocation(DbLocationCompanion dbLocationCompanion) async {
+    return await into(dbLocation).insert(dbLocationCompanion);
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Types
+   * -------------------------------------------------------------------------*/
+
+  // import type
+  Future<int> importType(DbIndexCompanion dbIndexCompanion) async {
+    return await into(dbIndex).insert(dbIndexCompanion);
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Everything Else
+   * -------------------------------------------------------------------------*/
+
+  // get all items in a particular container
+  // Future<List<DbItemData>> getContainerContents(String containerId) async {
+  //   return await (select(dbItem)..where((tbl) => tbl.container.like("%" + containerId + "%"))).get();
+  // }
 
   // get all items in a particular container
   Future<List<DbItemData>> getContainerContents(String containerId) async {
-    return await (select(dbItem)..where((tbl) => tbl.container.like("%" + containerId + "%"))).get();
+    // TODO 2022-05-18 a join would be really nice here too
+
+    var maps = await (select(dbLocation)..where((tbl) => tbl.insideId.like("%" + containerId + "%"))).get();
+    List<String> ids = [];
+
+    maps.forEach((element) {
+      ids.add(element.objectId ?? "");
+    });
+
+    // return await (select(dbItem)..where((tbl) => tbl.uniqueId.like("%" + containerId + "%"))).get();
+    return await (select(dbItem)..where((tbl) => tbl.uniqueId.isIn(ids))).get();
   }
+
+
+}
+
+class ItemMapped {
+  ItemMapped(this.item, this.mapping, this.container);
+
+  final DbItemData item;
+  final DbLocationData? mapping;
+  final DbContainerData? container;
 }
