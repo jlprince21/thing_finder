@@ -112,7 +112,7 @@ class ItemDetailScreen extends StatelessWidget {
                             ElevatedButton(
                               onPressed: () {
                                 Get.delete<ItemDetailScreen>();
-                                Get.to(ContainerDetailScreen(containerId: controller.currentContainer!.uniqueId!));
+                                Get.to(ContainerDetailScreen(containerId: controller.currentContainer!.uniqueId));
                               },
                               child: const Text('Go to Container'),
                             ),

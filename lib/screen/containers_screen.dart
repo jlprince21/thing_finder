@@ -91,13 +91,12 @@ class ContainersScreen extends StatelessWidget {
   }
 
   Widget containerListUI(List<DbContainerData> containerList, int axisCount) {
-    return StaggeredGridView.countBuilder(
-      itemCount: containerList.length,
-      crossAxisCount: 4,
-      staggeredTileBuilder: (index) => StaggeredTile.fit(axisCount),
+    return MasonryGridView.count(
+      itemCount: containerList.length, // TODO may not be explicitly needed for MasonryGridView
+      crossAxisCount: axisCount,
       mainAxisSpacing: 8,
       crossAxisSpacing: 4,
-      padding: EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.only(top: 10, bottom: 16),
       itemBuilder: (context, index) {
         DbContainerData dbContainerData = containerList[index];
         return InkWell(
@@ -165,15 +164,15 @@ class ContainersScreen extends StatelessWidget {
       actions: [
         IconButton(
           onPressed: () {
-            if (_p.axisCount.value == 2) {
-              _p.axisCount.value = 4;
-            } else {
+            if (_p.axisCount.value == 1) {
               _p.axisCount.value = 2;
+            } else {
+              _p.axisCount.value = 1;
             }
             _p.update();
           },
           icon: Icon(
-            _p.axisCount.value == 4 ? Icons.grid_on : Icons.list,
+            _p.axisCount.value == 2 ? Icons.grid_on : Icons.list,
             // color: Colors.black,
           ),
         )

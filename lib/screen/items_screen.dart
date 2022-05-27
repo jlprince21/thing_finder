@@ -101,18 +101,17 @@ class ItemsScreen extends StatelessWidget {
   }
 
   Widget itemListUI(List<DbItemData> itemList, int axisCount) {
-    return StaggeredGridView.countBuilder(
-      itemCount: itemList.length,
-      crossAxisCount: 4,
-      staggeredTileBuilder: (index) => StaggeredTile.fit(axisCount),
+    return MasonryGridView.count(
+      itemCount: itemList.length, // TODO may not be explicitly needed for MasonryGridView
+      crossAxisCount: axisCount,
       mainAxisSpacing: 8,
       crossAxisSpacing: 4,
-      padding: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.only(top: 10, bottom: 16),
       itemBuilder: (context, index) {
         DbItemData dbItemData = itemList[index];
         return InkWell(
           onTap: () {
-            _navigateToDetail(dbItemData.uniqueId ?? ""); // TODO this is messy
+            _navigateToDetail(dbItemData.uniqueId);
           },
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -175,15 +174,15 @@ class ItemsScreen extends StatelessWidget {
       actions: [
         IconButton(
           onPressed: () {
-            if (_p.axisCount.value == 2) {
-              _p.axisCount.value = 4;
-            } else {
+            if (_p.axisCount.value == 1) {
               _p.axisCount.value = 2;
+            } else {
+              _p.axisCount.value = 1;
             }
             _p.update();
           },
           icon: Icon(
-            _p.axisCount.value == 4 ? Icons.grid_on : Icons.list,
+            _p.axisCount.value == 2 ? Icons.grid_on : Icons.list,
             // color: Colors.black,
           ),
         )

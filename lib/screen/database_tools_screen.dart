@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -21,72 +20,45 @@ class DatabaseToolsScreen extends StatelessWidget {
     appDatabase = Provider.of<AppDatabase>(context);
 
     return Scaffold(
-      appBar: _getMainMenuAppBar(),
+      appBar: _getAppBar(),
       drawer: AppDrawer(),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            children: <Widget>[
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    child: const Text('Export DB'),
-                    onPressed: () {
-                      exportDatabase();
-                    },
-                  ),
-                ),
-              ),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    child: const Text('Import Items to DB'),
-                    onPressed: () {
-                      _pickFile("item");
-                    },
-                  ),
-                ),
-              ),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    child: const Text('Import Containers to DB'),
-                    onPressed: () {
-                      _pickFile("container");
-                    },
-                  ),
-                ),
-              ),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    child: const Text('Import Indexes to DB'),
-                    onPressed: () {
-                      _pickFile("index");
-                    },
-                  ),
-                ),
-              ),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    child: const Text('Import Locations to DB'),
-                    onPressed: () {
-                      _pickFile("location");
-                    },
-                  ),
-                ),
-              ),
-
-            ],
+      body: ListView(
+        children: [
+          ListTile(
+            title: const Text('Export DB'),
+            onTap: () {
+              exportDatabase();
+            },
           ),
-        ),
+
+          ListTile(
+            title: const Text('Import Containers to DB'),
+            onTap: () {
+              _pickFile("container");
+            },
+          ),
+
+          ListTile(
+            title: const Text('Import Indexes to DB'),
+            onTap: () {
+              _pickFile("index");
+            },
+          ),
+
+          ListTile(
+            title: const Text('Import Items to DB'),
+            onTap: () {
+              _pickFile("item");
+            },
+          ),
+
+          ListTile(
+            title: const Text('Import Locations to DB'),
+            onTap: () {
+              _pickFile("location");
+            },
+          ),
+        ],
       ),
     );
   }
@@ -98,7 +70,7 @@ class DatabaseToolsScreen extends StatelessWidget {
                     ));
   }
 
-  _getMainMenuAppBar(){
+  _getAppBar(){
     return AppBar(
       // backgroundColor: Colors.white,
       centerTitle: true,
