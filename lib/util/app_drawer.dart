@@ -105,8 +105,8 @@ class AppDrawer extends StatelessWidget {
               context: context,
               applicationIcon: const FlutterLogo(),
               applicationName: 'Thing Finder',
-              applicationVersion: 'April 2022',
-              applicationLegalese: '\u{a9} 2022 Thing Finder Enterprises',
+              applicationVersion: 'September 2022',
+              applicationLegalese: '\u{a9} 2022 Magic Codex LLC',
               children: aboutBoxChildren,
             );
         },
