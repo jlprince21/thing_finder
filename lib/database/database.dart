@@ -237,7 +237,7 @@ class AppDatabase extends _$AppDatabase {
     DbContainerData? theContainer;
     if (theMap != null && theMap.insideId != null)
     {
-      theContainer = await  (select(dbContainer)..where((t) => t.uniqueId.equals(theMap.insideId))).getSingle();
+      theContainer = await  (select(dbContainer)..where((t) => t.uniqueId.equals(theMap.insideId!))).getSingle();
     }
 
     var results = ItemMapped(theItem, theMap, theContainer);
