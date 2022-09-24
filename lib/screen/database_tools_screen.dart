@@ -31,33 +31,33 @@ class DatabaseToolsScreen extends StatelessWidget {
             },
           ),
 
-          ListTile(
-            title: const Text('Import Containers to DB'),
-            onTap: () {
-              _pickFile("container");
-            },
-          ),
+          // ListTile(
+          //   title: const Text('Import Containers to DB'),
+          //   onTap: () {
+          //     _pickFile("container");
+          //   },
+          // ),
 
-          ListTile(
-            title: const Text('Import Indexes to DB'),
-            onTap: () {
-              _pickFile("index");
-            },
-          ),
+          // ListTile(
+          //   title: const Text('Import Indexes to DB'),
+          //   onTap: () {
+          //     _pickFile("index");
+          //   },
+          // ),
 
-          ListTile(
-            title: const Text('Import Items to DB'),
-            onTap: () {
-              _pickFile("item");
-            },
-          ),
+          // ListTile(
+          //   title: const Text('Import Items to DB'),
+          //   onTap: () {
+          //     _pickFile("item");
+          //   },
+          // ),
 
-          ListTile(
-            title: const Text('Import Locations to DB'),
-            onTap: () {
-              _pickFile("location");
-            },
-          ),
+          // ListTile(
+          //   title: const Text('Import Locations to DB'),
+          //   onTap: () {
+          //     _pickFile("location");
+          //   },
+          // ),
         ],
       ),
     );
