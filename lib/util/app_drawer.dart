@@ -103,7 +103,7 @@ class AppDrawer extends StatelessWidget {
         onTap: () {
           showAboutDialog(
               context: context,
-              applicationIcon: const FlutterLogo(),
+              // applicationIcon: , // TODO 2022-09-25 add this back someday
               applicationName: 'Thing Finder',
               applicationVersion: 'September 2022',
               applicationLegalese: '\u{a9} 2022 Magic Codex LLC',
