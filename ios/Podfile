@@ -35,11 +35,15 @@ target 'Runner' do
 end
 
 # see https://stackoverflow.com/questions/63973136/the-ios-deployment-target-iphoneos-deployment-target-is-set-to-8-0-in-flutter
+# 2022-09-26 needed this for DKPhotoGallery and others failing code signing https://stackoverflow.com/questions/73730719/signing-for-dkphotogallery-dkphotogallery-requires-a-development-team
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
     target.build_configurations.each do |config|
         config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
+        config.build_settings['EXPANDED_CODE_SIGN_IDENTITY'] = ""
+        config.build_settings['CODE_SIGNING_REQUIRED'] = "NO"
+        config.build_settings['CODE_SIGNING_ALLOWED'] = "NO"
     end
   end
 end
