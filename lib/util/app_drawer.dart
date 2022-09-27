@@ -65,7 +65,7 @@ class AppDrawer extends StatelessWidget {
       ListTile(
         title: const Text('Items'),
         onTap: () {
-          Get.to(ItemsScreen(searchText: "", containerId: ""));
+          Get.to(ItemsScreen(searchText: "", containerId: ""), preventDuplicates: false); // preventDuplicates allows us to return to items/containers page after search
         },
       ),
     );
@@ -74,7 +74,7 @@ class AppDrawer extends StatelessWidget {
       ListTile(
         title: const Text('Containers'),
         onTap: () {
-          Get.to(ContainersScreen(searchText: ""));
+          Get.to(ContainersScreen(searchText: ""), preventDuplicates: false); // preventDuplicates allows us to return to items/containers page after search
         },
       ),
     );

@@ -61,22 +61,17 @@ class SearchScreen extends StatelessWidget {
                         controller.setValue(value.toString());
                       }),
                 ),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ElevatedButton(
-                      child: const Text('Search'),
-                      onPressed: () {
-                        if (controller.searchType == "item") {
-                          Get.delete<SearchScreenController>(); // important. resets controller so values aren't retained
-                          Get.to(ItemsScreen(searchText: controller.searchController.text, containerId: ""));
-                        } else {
-                          Get.delete<SearchScreenController>(); // important. resets controller so values aren't retained
-                          Get.to(ContainersScreen(searchText: controller.searchController.text));
-                        }
-                      },
-                    ),
-                  ),
+                ElevatedButton(
+                  child: const Text('Search'),
+                  onPressed: () {
+                    if (controller.searchType == "item") {
+                      Get.delete<SearchScreenController>(); // important. resets controller so values aren't retained
+                      Get.to(ItemsScreen(searchText: controller.searchController.text, containerId: ""));
+                    } else {
+                      Get.delete<SearchScreenController>(); // important. resets controller so values aren't retained
+                      Get.to(ContainersScreen(searchText: controller.searchController.text));
+                    }
+                  },
                 ),
               ],
             ),
