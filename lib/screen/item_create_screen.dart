@@ -148,7 +148,8 @@ class ItemCreateScreen extends StatelessWidget {
         IconButton(
           onPressed: () {
             _saveToDb(controller.titleEditingController.text,
-                controller.descriptionEditingController.text, controller.selectedContainer);
+                      controller.descriptionEditingController.text,
+                      controller.selectedContainer);
           },
           icon: const Icon(
             Icons.save,

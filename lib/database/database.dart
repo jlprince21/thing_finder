@@ -107,7 +107,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // create new container
-  Future<int> createContainer(String title, String? description) async {
+  Future<int> createContainer(String title, String? description, String? placeId) async {
     var uuid = const Uuid();
     var id = uuid.v4();
     var date = DateFormat.yMMMd().format(DateTime.now());
@@ -116,7 +116,11 @@ class AppDatabase extends _$AppDatabase {
     await into(dbIndex).insert(DbIndexCompanion(uniqueId: Value(id), type: Value(1)));
 
     // insert into container table
-    return await into(dbContainer).insert(DbContainerCompanion(date: Value(date), description: Value(description), title: Value(title), uniqueId: Value(id)));
+    await into(dbContainer).insert(DbContainerCompanion(date: Value(date), description: Value(description), title: Value(title), uniqueId: Value(id)));
+
+    // make mapping in location table
+    // TODO 2022-05-18 probably need to check if container id exists and make sure a null gets put in map if none passed in
+    return await into(dbLocation).insert(DbLocationCompanion(date: Value(date), objectId: Value(id), insideId: Value(placeId), uniqueId: Value(uuid.v4())));
   }
 
   // retrieve all containers
@@ -125,8 +129,12 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // update container
-  Future<bool> updateContainer(DbContainerData dbContainerData) async {
-    return await update(dbContainer).replace(dbContainerData);
+  Future<bool> updateContainer(DbContainerData dbContainerData, String? placeId) async {
+    await update(dbContainer).replace(dbContainerData);
+
+    var theMap = await  (select(dbLocation)..where((t) => t.objectId.equals(dbContainerData.uniqueId))).getSingle();
+
+    return await update(dbLocation).replace(DbLocationData(date: DateFormat.yMMMd().format(DateTime.now()), uniqueId: theMap.uniqueId, insideId: placeId, objectId: dbContainerData.uniqueId));
   }
 
   // delete container
@@ -151,6 +159,22 @@ class AppDatabase extends _$AppDatabase {
   // get specific container
   Future<DbContainerData> getContainer(String containerId) async {
     return await (select(dbContainer)..where((tbl) => tbl.uniqueId.equals(containerId))).getSingle();
+  }
+
+    // get specific container with enough data needed for the container details screen
+  Future<ContainerMapped> getContainerDetails(String containerId) async {
+    // TODO 2022-05-17 try Drift join syntax someday...
+    var theContainer = await (select(dbContainer)..where((t) => t.uniqueId.equals(containerId))).getSingle();
+    var theMap = await  (select(dbLocation)..where((t) => t.objectId.equals(containerId))).getSingle();
+
+    DbPlaceData? thePlace;
+    if (theMap != null && theMap.insideId != null)
+    {
+      thePlace = await  (select(dbPlace)..where((t) => t.uniqueId.equals(theMap.insideId!))).getSingle();
+    }
+
+    var results = ContainerMapped(theContainer, theMap, thePlace);
+    return results;
   }
 
   // search for container
@@ -343,4 +367,12 @@ class ItemMapped {
   final DbItemData item;
   final DbLocationData? mapping;
   final DbContainerData? container;
+}
+
+class ContainerMapped {
+  ContainerMapped(this.container, this.mapping, this.place);
+
+  final DbContainerData container;
+  final DbLocationData? mapping;
+  final DbPlaceData? place;
 }
