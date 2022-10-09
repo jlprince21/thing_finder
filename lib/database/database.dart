@@ -19,7 +19,7 @@ class DbContainer extends Table {
   Set<Column> get primaryKey => {uniqueId};
 }
 
-// Using just an id you can look up what it refers to eg 0 = item, 1 = container, etc
+// Using just an id you can look up what it refers to eg 0 = item, 1 = container, 2 = place etc
 class DbIndex extends Table {
   TextColumn get uniqueId => text()();
   IntColumn get type => integer()();
@@ -48,6 +48,16 @@ class DbLocation extends Table {
   Set<Column> get primaryKey => {uniqueId};
 }
 
+class DbPlace extends Table {
+  TextColumn get uniqueId => text().references(DbIndex, #uniqueId)();
+  TextColumn get title => text()();
+  TextColumn get description => text().nullable().named('description')();
+  TextColumn get date => text()();
+
+  @override
+  Set<Column> get primaryKey => {uniqueId};
+}
+
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     // create the database file, called db.sqlite here, in the documents folder
@@ -57,12 +67,12 @@ LazyDatabase _openConnection() {
   });
 }
 
-@DriftDatabase(tables: [DbContainer, DbIndex, DbItem, DbLocation])
+@DriftDatabase(tables: [DbContainer, DbIndex, DbItem, DbLocation, DbPlace])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
@@ -79,17 +89,10 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        // sample Drift code
-        // if (from < 2) {
-        //   // we added the dueDate property in the change from version 1 to
-        //   // version 2
-        //   await m.addColumn(todos, todos.dueDate);
-        // }
-        // if (from < 3) {
-        //   // we added the priority property in the change from version 1 or 2
-        //   // to version 3
-        //   await m.addColumn(todos, todos.priority);
-        // }
+        if (from < 2) {
+          // add the Places table
+          await m.createTable(dbPlace);
+        }
       },
     );
   }
@@ -251,6 +254,33 @@ class AppDatabase extends _$AppDatabase {
   // import location
   Future<int> importLocation(DbLocationCompanion dbLocationCompanion) async {
     return await into(dbLocation).insert(dbLocationCompanion);
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Places
+   * -------------------------------------------------------------------------*/
+
+  // retrieve all places
+  Future<List<DbPlaceData>> getAllPlaces() async {
+    return await (select(dbPlace)..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
+  }
+
+  // create new place
+  Future<int> createPlace(String title, String? description) async {
+    var uuid = const Uuid();
+    var id = uuid.v4();
+    var date = DateFormat.yMMMd().format(DateTime.now());
+
+    // insert into type table
+    await into(dbIndex).insert(DbIndexCompanion(uniqueId: Value(id), type: Value(2)));
+
+    // insert into place table
+    return await into(dbPlace).insert(DbPlaceCompanion(date: Value(date), description: Value(description), title: Value(title), uniqueId: Value(id)));
+  }
+
+  // search for place
+  Future<List<DbPlaceData>> searchForPlaces(String searchText) async {
+    return await (select(dbPlace)..where((tbl) => tbl.title.like("%" + searchText + "%"))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
   }
 
   /* ---------------------------------------------------------------------------
