@@ -143,11 +143,11 @@ class ContainersScreen extends StatelessWidget {
   }
 
   _navigateToCreate() {
-    Get.to(ContainerCreateScreen());
+    Get.offAll(ContainerCreateScreen());
   }
 
   _navigateToDetail(String? containerId) async {
-    Get.to(ContainerDetailScreen(containerId: containerId!));
+    Get.to(ContainerDetailScreen(containerId: containerId!)); // 2022-10-08 let route stack build
   }
 
   _getContainersAppBar(BuildContext context) {

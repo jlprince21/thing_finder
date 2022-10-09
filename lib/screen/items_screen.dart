@@ -153,11 +153,11 @@ class ItemsScreen extends StatelessWidget {
   }
 
   _navigateToDetail(String itemId) async {
-    Get.to(ItemDetailScreen(itemId: itemId));
+    Get.to(ItemDetailScreen(itemId: itemId)); // 2022-10-08 let route stack build
   }
 
   _navigateToCreate() async {
-    Get.to(ItemCreateScreen());
+    Get.to(ItemCreateScreen()); // 2022-10-08 let route stack build
   }
 
   _getItemsAppBar() {

@@ -97,7 +97,7 @@ class ContainerDetailScreen extends StatelessWidget {
       ElevatedButton(
         onPressed: () {
           Get.delete<ContainerDetailScreenController>(); // important. resets controller so values aren't retained
-          Get.to(ItemsScreen(searchText: "", containerId: containerId));
+          Get.to(ItemsScreen(searchText: "", containerId: containerId)); // 2022-10-08 let route stack build
         },
         child: const Text('View Contents'),
       ),
@@ -155,7 +155,7 @@ class ContainerDetailScreen extends StatelessWidget {
             date: DateFormat.yMMMd().format(DateTime.now())))
         .then((value) {
       Get.delete<ContainerDetailScreenController>(); // important. resets controller so values aren't retained
-      Get.to(ContainersScreen(searchText: ""));
+      Get.offAll(ContainersScreen(searchText: ""));
     });
   }
 
@@ -175,10 +175,9 @@ class ContainerDetailScreen extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                // Get.to(ContainersScreen(searchText: ""));
                 appDatabase.deleteContainerById(containerId).then((value) {
                   Get.delete<ContainerDetailScreenController>(); // important. resets controller so values aren't retained
-                  Get.to(ContainersScreen(searchText: ""));
+                  Get.offAll(ContainersScreen(searchText: ""));
                 });
               },
               child: const Text('Delete'),

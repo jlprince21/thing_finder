@@ -112,7 +112,7 @@ class ItemDetailScreen extends StatelessWidget {
                             ElevatedButton(
                               onPressed: () {
                                 Get.delete<ItemDetailScreen>();
-                                Get.to(ContainerDetailScreen(containerId: controller.currentContainer!.uniqueId));
+                                Get.to(ContainerDetailScreen(containerId: controller.currentContainer!.uniqueId)); // 2022-10-08 let route stack build
                               },
                               child: const Text('Go to Container'),
                             ),
@@ -223,7 +223,7 @@ class ItemDetailScreen extends StatelessWidget {
             containerId.isEmpty ? null : containerId)
         .then((value) {
       Get.delete<ItemDetailScreenController>(); // important. resets controller so values aren't retained
-      Get.to(ItemsScreen(searchText: "", containerId: ""));
+      Get.offAll(ItemsScreen(searchText: "", containerId: ""));
     },);
   }
 
@@ -246,7 +246,7 @@ class ItemDetailScreen extends StatelessWidget {
                 Navigator.pop(context);
                 appDatabase.deleteItemById(itemId).then((value) {
                   Get.delete<ItemDetailScreenController>(); // important. resets controller so values aren't retained
-                  Get.to(ItemsScreen(searchText: "", containerId: ""));
+                  Get.offAll(ItemsScreen(searchText: "", containerId: ""));
                 });
               },
               child: const Text('Delete'),

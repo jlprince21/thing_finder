@@ -66,10 +66,10 @@ class SearchScreen extends StatelessWidget {
                   onPressed: () {
                     if (controller.searchType == "item") {
                       Get.delete<SearchScreenController>(); // important. resets controller so values aren't retained
-                      Get.to(ItemsScreen(searchText: controller.searchController.text, containerId: ""));
+                      Get.to(ItemsScreen(searchText: controller.searchController.text, containerId: "")); // 2022-10-08 let route stack build
                     } else {
                       Get.delete<SearchScreenController>(); // important. resets controller so values aren't retained
-                      Get.to(ContainersScreen(searchText: controller.searchController.text));
+                      Get.to(ContainersScreen(searchText: controller.searchController.text)); // 2022-10-08 let route stack build
                     }
                   },
                 ),

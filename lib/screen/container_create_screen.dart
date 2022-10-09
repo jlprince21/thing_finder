@@ -66,7 +66,7 @@ class ContainerCreateScreen extends StatelessWidget {
       elevation: 0,
       leading: IconButton(
         onPressed: () {
-          Get.to(ContainersScreen(searchText: ""));
+          Get.off(ContainersScreen(searchText: ""));
         },
         icon: const Icon(
           Icons.chevron_left_outlined,
@@ -99,7 +99,7 @@ class ContainerCreateScreen extends StatelessWidget {
             )
         .then((value) {
       Get.delete<ContainerCreateScreenController>(); // important. resets controller so values aren't retained after creating a container and making another
-      Get.to(ContainersScreen(searchText: ""));
+      Get.offAll(ContainersScreen(searchText: ""));
     });
   }
 }

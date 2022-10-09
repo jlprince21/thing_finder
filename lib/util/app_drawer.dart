@@ -11,11 +11,18 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> drawerWidgets = <Widget>[];
-    drawerWidgets.add(const DrawerHeader(
+    drawerWidgets.add(DrawerHeader(
       decoration: BoxDecoration(
         color: Colors.blue,
       ),
-      child: Text('Thing Finder!'),
+      child: CircleAvatar(
+        radius: 5,
+        backgroundColor: Colors.green,
+        child: Padding(
+          padding: const EdgeInsets.all(4), // Border radius
+          child: ClipOval(child: Image(image: AssetImage('assets/icon/icon.png'))),
+        ),
+      ),
     ));
     drawerWidgets.addAll(getMenu(context, includeMainMenu: true));
 
@@ -55,7 +62,7 @@ class AppDrawer extends StatelessWidget {
         ListTile(
           title: const Text('Main Menu'),
           onTap: () {
-            Get.to(MainMenuScreen());
+            Get.to(MainMenuScreen()); // 2022-10-08 let route stack build
           },
         ),
       );
@@ -65,6 +72,7 @@ class AppDrawer extends StatelessWidget {
       ListTile(
         title: const Text('Items'),
         onTap: () {
+          // 2022-10-08 let route stack build
           Get.to(ItemsScreen(searchText: "", containerId: ""), preventDuplicates: false); // preventDuplicates allows us to return to items/containers page after search
         },
       ),
@@ -74,6 +82,7 @@ class AppDrawer extends StatelessWidget {
       ListTile(
         title: const Text('Containers'),
         onTap: () {
+          // 2022-10-08 let route stack build
           Get.to(ContainersScreen(searchText: ""), preventDuplicates: false); // preventDuplicates allows us to return to items/containers page after search
         },
       ),
@@ -83,7 +92,7 @@ class AppDrawer extends StatelessWidget {
       ListTile(
         title: const Text('Search'),
         onTap: () {
-          Get.to(SearchScreen());
+          Get.to(SearchScreen()); // 2022-10-08 let route stack build
         },
       ),
     );
@@ -92,7 +101,7 @@ class AppDrawer extends StatelessWidget {
       ListTile(
         title: const Text('Database Tools'),
         onTap: () {
-          Get.to(DatabaseToolsScreen());
+          Get.to(DatabaseToolsScreen()); // 2022-10-08 let route stack build
         },
       ),
     );
@@ -102,13 +111,21 @@ class AppDrawer extends StatelessWidget {
         title: const Text('About'),
         onTap: () {
           showAboutDialog(
-              context: context,
-              // applicationIcon: , // TODO 2022-09-25 add this back someday
-              applicationName: 'Thing Finder',
-              applicationVersion: 'September 2022',
-              applicationLegalese: '\u{a9} 2022 Magic Codex LLC',
-              children: aboutBoxChildren,
-            );
+            context: context,
+            applicationIcon:
+              const CircleAvatar(
+                radius: 40,
+                backgroundColor: Colors.green,
+                child: Padding(
+                  padding: const EdgeInsets.all(4), // Border radius
+                  child: ClipOval(child: Image(image: AssetImage('assets/icon/icon.png'))),
+                ),
+              ),
+            applicationName: 'Thing Finder',
+            applicationVersion: 'October 2022',
+            applicationLegalese: '\u{a9} 2022 Magic Codex LLC',
+            children: aboutBoxChildren,
+          );
         },
       ),
     );

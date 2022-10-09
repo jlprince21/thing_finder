@@ -25,7 +25,7 @@ class DatabaseToolsScreen extends StatelessWidget {
       body: ListView(
         children: [
           ListTile(
-            title: const Text('Export DB'),
+            title: const Text('Export Database'),
             onTap: () {
               exportDatabase();
             },

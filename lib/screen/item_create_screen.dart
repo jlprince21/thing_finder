@@ -133,7 +133,7 @@ class ItemCreateScreen extends StatelessWidget {
       elevation: 0,
       leading: IconButton(
         onPressed: () {
-          Get.to(ItemsScreen(searchText: "", containerId: ""));
+          Get.off(ItemsScreen(searchText: "", containerId: ""));
         },
         icon: const Icon(
           Icons.chevron_left_outlined,
@@ -171,7 +171,7 @@ class ItemCreateScreen extends StatelessWidget {
             containerId)
         .then((value) {
       Get.delete<ItemCreateScreenController>(); // important. resets controller so values aren't retained after creating an item and making another
-      Get.to(ItemsScreen(searchText: "", containerId: ""));
+      Get.offAll(ItemsScreen(searchText: "", containerId: ""));
     });
   }
 }
