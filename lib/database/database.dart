@@ -278,9 +278,27 @@ class AppDatabase extends _$AppDatabase {
     return await into(dbPlace).insert(DbPlaceCompanion(date: Value(date), description: Value(description), title: Value(title), uniqueId: Value(id)));
   }
 
+  // delete place by id
+  Future<int> deletePlaceById(String placeId) async {
+    await (delete(dbPlace)..where((t) => t.uniqueId.equals(placeId))).go();
+    await (update(dbLocation)..where((t) => t.insideId.equals(placeId))).write(DbLocationCompanion(insideId: Value(null))); // item or container in a place TODO should this be a delete instead?
+    // await (update(dbLocation)..where((t) => t.objectId.equals(containerId))).write(DbLocationCompanion(insideId: Value(null))); // container in a location (future plans) TODO should this be a delete instead?
+    return await (delete(dbIndex)..where((t) => t.uniqueId.equals(placeId))).go();
+  }
+
+  // get specific place
+  Future<DbPlaceData> getPlace(String placeId) async {
+    return await (select(dbPlace)..where((tbl) => tbl.uniqueId.equals(placeId))).getSingle();
+  }
+
   // search for place
   Future<List<DbPlaceData>> searchForPlaces(String searchText) async {
     return await (select(dbPlace)..where((tbl) => tbl.title.like("%" + searchText + "%"))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
+  }
+
+  // update place
+  Future<bool> updatePlace(DbPlaceData dbPlaceData) async {
+    return await update(dbPlace).replace(dbPlaceData);
   }
 
   /* ---------------------------------------------------------------------------

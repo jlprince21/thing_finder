@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/screen/place_create_screen.dart';
-// import 'package:thing_finder/screen/place_detail_screen.dart';
+import 'package:thing_finder/screen/place_detail_screen.dart';
 import 'package:thing_finder/util/app_drawer.dart';
 
 class PlacesScreenController extends GetxController {
@@ -101,7 +101,7 @@ class PlacesScreen extends StatelessWidget {
         DbPlaceData dbPlaceData = placeList[index];
         return InkWell(
           onTap: () {
-            // _navigateToDetail(dbPlaceData.uniqueId);
+            _navigateToDetail(dbPlaceData.uniqueId);
           },
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -146,9 +146,9 @@ class PlacesScreen extends StatelessWidget {
     Get.offAll(PlaceCreateScreen());
   }
 
-  // _navigateToDetail(String? placeId) async {
-  //   Get.to(PlaceDetailScreen(placeId: placeId!)); // 2022-10-08 let route stack build
-  // }
+  _navigateToDetail(String? placeId) async {
+    Get.to(PlaceDetailScreen(placeId: placeId!)); // 2022-10-08 let route stack build
+  }
 
   _getPlacesAppBar(BuildContext context) {
     final PlacesScreenController _p = Get.put(PlacesScreenController(""));
