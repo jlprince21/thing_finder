@@ -371,6 +371,33 @@ class AppDatabase extends _$AppDatabase {
 
     return GenericItemContainerOrPlace("", "", "", "", Differentiator.unknown);
   }
+
+  // get all containers and items in a particular place
+  Future<List<GenericItemContainerOrPlace>> getPlaceContents(String placeId) async {
+    // TODO 2022-05-18 a join would be really nice here too
+    var maps = await (select(dbLocation)..where((tbl) => tbl.insideId.like("%" + placeId + "%"))).get();
+    List<String> ids = [];
+
+    maps.forEach((element) {
+      ids.add(element.objectId ?? "");
+    });
+
+    var items = await (select(dbItem)..where((tbl) => tbl.uniqueId.isIn(ids))).get();
+    var containers = await (select(dbContainer)..where((tbl) => tbl.uniqueId.isIn(ids))).get();
+
+    List<GenericItemContainerOrPlace> theList = [];
+
+    items.forEach((element) {
+      theList.add(GenericItemContainerOrPlace(element.uniqueId, element.title, element.description, element.date, Differentiator.item));
+    });
+
+    containers.forEach((element) {
+      theList.add(GenericItemContainerOrPlace(element.uniqueId, element.title, element.description, element.date, Differentiator.container));
+    });
+
+    return theList;
+  }
+
 }
 
 class ContainersAndPlaces {

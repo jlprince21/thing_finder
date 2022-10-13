@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/screen/container_detail_screen.dart';
 import 'package:thing_finder/screen/items_screen.dart';
+import 'package:thing_finder/screen/place_detail_screen.dart';
 
 class ItemDetailScreenController extends GetxController {
   var titleEditingController = TextEditingController();
@@ -113,7 +114,15 @@ class ItemDetailScreen extends StatelessWidget {
                             ElevatedButton(
                               onPressed: () {
                                 Get.delete<ItemDetailScreen>();
-                                Get.to(ContainerDetailScreen(containerId: controller.currentContainerOrPlace!.uniqueId)); // 2022-10-08 let route stack build
+
+                                if (controller.currentContainerOrPlace!.thingType == Differentiator.container)
+                                {
+                                  Get.to(ContainerDetailScreen(containerId: controller.currentContainerOrPlace!.uniqueId)); // 2022-10-08 let route stack build
+                                }
+                                else if (controller.currentContainerOrPlace!.thingType == Differentiator.place)
+                                {
+                                  Get.to(PlaceDetailScreen(placeId: controller.currentContainerOrPlace!.uniqueId)); // 2022-10-08 let route stack build
+                                }
                               },
                               child: Text('Go to ${controller.currentContainerOrPlace!.thingType == Differentiator.container ? "Container" : "Place"}'),
                             ),

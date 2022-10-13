@@ -7,6 +7,8 @@ import 'package:thing_finder/screen/containers_screen.dart';
 import 'package:thing_finder/screen/items_screen.dart';
 import 'package:thing_finder/screen/places_screen.dart';
 
+import 'items_and_containers_screen.dart';
+
 class PlaceDetailScreenController extends GetxController {
   var titleEditingController = TextEditingController();
   var descriptionEditingController = TextEditingController();
@@ -94,16 +96,15 @@ class PlaceDetailScreen extends StatelessWidget {
       ),
     );
 
-  // TODO 2022-10-09 will need a special screen supporting items and containers
-    // detailWidgets.add(
-    //   ElevatedButton(
-    //     onPressed: () {
-    //       Get.delete<PlaceDetailScreenController>(); // important. resets controller so values aren't retained
-    //       Get.to(ItemsScreen(searchText: "", placeId: placeId)); // 2022-10-08 let route stack build
-    //     },
-    //     child: const Text('View Contents'),
-    //   ),
-    // );
+    detailWidgets.add(
+      ElevatedButton(
+        onPressed: () {
+          Get.delete<PlaceDetailScreenController>(); // important. resets controller so values aren't retained
+          Get.to(ItemsAndContainersScreen(searchText: "", placeId: placeId)); // 2022-10-08 let route stack build
+        },
+        child: const Text('View Contents'),
+      ),
+    );
 
     return detailWidgets;
   }
