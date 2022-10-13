@@ -82,7 +82,7 @@ class AppDatabase extends _$AppDatabase {
         // if (details.wasCreated) {
         // }
 
-        // needed to activate foreign keys as sqlite3 doesn't have them by default
+        // activate foreign keys as sqlite3 doesn't have them by default
         await customStatement('PRAGMA foreign_keys = ON');
       },
       onCreate: (Migrator m) async {
@@ -113,7 +113,7 @@ class AppDatabase extends _$AppDatabase {
     var date = DateFormat.yMMMd().format(DateTime.now());
 
     // insert into type table
-    await into(dbIndex).insert(DbIndexCompanion(uniqueId: Value(id), type: Value(1)));
+    await into(dbIndex).insert(DbIndexCompanion(uniqueId: Value(id), type: Value(Differentiator.container.value)));
 
     // insert into container table
     await into(dbContainer).insert(DbContainerCompanion(date: Value(date), description: Value(description), title: Value(title), uniqueId: Value(id)));
@@ -198,7 +198,7 @@ class AppDatabase extends _$AppDatabase {
     var date = DateFormat.yMMMd().format(DateTime.now());
 
     // insert into type table
-    await into(dbIndex).insert(DbIndexCompanion(uniqueId: Value(id), type: Value(0)));
+    await into(dbIndex).insert(DbIndexCompanion(uniqueId: Value(id), type: Value(Differentiator.item.value)));
 
     // insert into item table
     await into(dbItem).insert(DbItemCompanion(date: Value(date), description: Value(description), title: Value(title), uniqueId: Value(id)));
@@ -249,25 +249,19 @@ class AppDatabase extends _$AppDatabase {
     return await (select(dbItem)..where((tbl) => tbl.title.like("%" + searchText + "%"))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
   }
 
-  // get specific item
-  // Future<DbItemData> getItem(String itemId) async {
-  //   print('get item');
-  //   return await (select(dbItem)..where((t) => t.uniqueId.equals(itemId))).getSingle();
-  // }
-
   // get specific item with enough data needed for the item details screen
-  Future<ItemMapped> getItem(String itemId) async {
+  Future<ItemMapped> getItemDetails(String itemId) async {
     // TODO 2022-05-17 try Drift join syntax someday...
     var theItem = await (select(dbItem)..where((t) => t.uniqueId.equals(itemId))).getSingle();
     var theMap = await  (select(dbLocation)..where((t) => t.objectId.equals(itemId))).getSingle();
 
-    DbContainerData? theContainer;
+    GenericItemContainerOrPlace? theContainerOrPlace;
     if (theMap != null && theMap.insideId != null)
     {
-      theContainer = await  (select(dbContainer)..where((t) => t.uniqueId.equals(theMap.insideId!))).getSingle();
+      theContainerOrPlace = await getContainerOrPlace(theMap.insideId!);
     }
 
-    var results = ItemMapped(theItem, theMap, theContainer);
+    var results = ItemMapped(theItem, theMap, theContainerOrPlace);
     return results;
   }
 
@@ -296,7 +290,7 @@ class AppDatabase extends _$AppDatabase {
     var date = DateFormat.yMMMd().format(DateTime.now());
 
     // insert into type table
-    await into(dbIndex).insert(DbIndexCompanion(uniqueId: Value(id), type: Value(2)));
+    await into(dbIndex).insert(DbIndexCompanion(uniqueId: Value(id), type: Value(Differentiator.place.value)));
 
     // insert into place table
     return await into(dbPlace).insert(DbPlaceCompanion(date: Value(date), description: Value(description), title: Value(title), uniqueId: Value(id)));
@@ -339,14 +333,8 @@ class AppDatabase extends _$AppDatabase {
    * -------------------------------------------------------------------------*/
 
   // get all items in a particular container
-  // Future<List<DbItemData>> getContainerContents(String containerId) async {
-  //   return await (select(dbItem)..where((tbl) => tbl.container.like("%" + containerId + "%"))).get();
-  // }
-
-  // get all items in a particular container
   Future<List<DbItemData>> getContainerContents(String containerId) async {
     // TODO 2022-05-18 a join would be really nice here too
-
     var maps = await (select(dbLocation)..where((tbl) => tbl.insideId.like("%" + containerId + "%"))).get();
     List<String> ids = [];
 
@@ -354,19 +342,50 @@ class AppDatabase extends _$AppDatabase {
       ids.add(element.objectId ?? "");
     });
 
-    // return await (select(dbItem)..where((tbl) => tbl.uniqueId.like("%" + containerId + "%"))).get();
     return await (select(dbItem)..where((tbl) => tbl.uniqueId.isIn(ids))).get();
   }
 
+  // retrieve all containers and places
+  Future<ContainersAndPlaces> getAllContainersAndPlaces() async {
+    var containers = await (select(dbContainer)..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
+    var places = await (select(dbPlace)..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
 
+    var results = ContainersAndPlaces(containers, places);
+    return results;
+  }
+
+  // retrieve specific container or place
+  Future<GenericItemContainerOrPlace> getContainerOrPlace(String containerOrPlaceId) async {
+    var index = await (select(dbIndex)..where((tbl) => tbl.uniqueId.equals(containerOrPlaceId))).getSingle();
+
+    if (index.type == Differentiator.container.value) // container
+    {
+      var container = await getContainer(index.uniqueId);
+      return GenericItemContainerOrPlace(container.uniqueId, container.title, container.description, container.date, Differentiator.container);
+    }
+    else if (index.type ==  Differentiator.place.value) // place
+    {
+      var place = await getPlace(index.uniqueId);
+      return GenericItemContainerOrPlace(place.uniqueId, place.title, place.description, place.date, Differentiator.place);
+    }
+
+    return GenericItemContainerOrPlace("", "", "", "", Differentiator.unknown);
+  }
+}
+
+class ContainersAndPlaces {
+  ContainersAndPlaces(this.containers, this.places);
+
+  final List<DbContainerData> containers;
+  final List<DbPlaceData> places;
 }
 
 class ItemMapped {
-  ItemMapped(this.item, this.mapping, this.container);
+  ItemMapped(this.item, this.mapping, this.containerOrPlace);
 
   final DbItemData item;
   final DbLocationData? mapping;
-  final DbContainerData? container;
+  final GenericItemContainerOrPlace? containerOrPlace;
 }
 
 class ContainerMapped {
@@ -375,4 +394,26 @@ class ContainerMapped {
   final DbContainerData container;
   final DbLocationData? mapping;
   final DbPlaceData? place;
+}
+
+class GenericItemContainerOrPlace {
+  GenericItemContainerOrPlace(this.uniqueId, this.title, this.description, this.date, this.thingType);
+
+  final String uniqueId;
+  final String title;
+  final String? description;
+  final String date;
+
+  final Differentiator thingType;
+}
+
+enum Differentiator {
+  item(0),
+  container(1),
+  place(2),
+  unknown(3);
+
+
+  const Differentiator(this.value);
+  final int value;
 }

@@ -9,8 +9,8 @@ import 'package:thing_finder/screen/items_screen.dart';
 class ItemDetailScreenController extends GetxController {
   var titleEditingController = TextEditingController();
   var descriptionEditingController = TextEditingController();
-  DbContainerData? currentContainer;
-  String? selectedContainer = null;
+  GenericItemContainerOrPlace? currentContainerOrPlace;
+  String? selectedContainerOrPlace = null;
 
   @override
   void dispose() {
@@ -34,7 +34,7 @@ class ItemDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: _getDetailAppBar(context, controller, itemId),
       body: FutureBuilder(
-        future: appDatabase.getItem(itemId),
+        future: appDatabase.getItemDetails(itemId),
         builder: (context, AsyncSnapshot<ItemMapped> snapshot) {
           if (snapshot.hasData) {
             var theItem = snapshot.data;
@@ -42,33 +42,34 @@ class ItemDetailScreen extends StatelessWidget {
             controller.descriptionEditingController.text = theItem.item.description ?? "";
 
             return FutureBuilder(
-                future: appDatabase.getContainer(theItem.container?.uniqueId ?? ""),
-                builder: (context, AsyncSnapshot<DbContainerData> snapshot) {
+                future: appDatabase.getContainerOrPlace(theItem.containerOrPlace?.uniqueId ?? ""),
+                builder: (context, AsyncSnapshot<GenericItemContainerOrPlace> snapshot) {
                   if (snapshot.hasData) {
-                    controller.currentContainer = snapshot.data;
-                    controller.selectedContainer = snapshot.data!.uniqueId;
+                    controller.currentContainerOrPlace = snapshot.data;
+                    controller.selectedContainerOrPlace = snapshot.data!.uniqueId;
                   } else {
-                    controller.currentContainer = null;
+                    controller.currentContainerOrPlace = null;
                   }
 
                   return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       child: Column(
                         children: [
-                          FutureBuilder<List<DbContainerData>>(
-                            future: _getContainersFromDatabase(),
+                          FutureBuilder<ContainersAndPlaces>(
+                            future: _getContainersAndPlacesFromDatabase(),
                             builder: (context, snapshot) {
                               if (snapshot.hasData) {
-                                List<DbContainerData>? containerList = snapshot.data;
-                                if (containerList != null) {
+                                List<DbContainerData>? containerList = snapshot.data!.containers;
+                                List<DbPlaceData>? placeList = snapshot.data!.places;
+                                if (containerList != null || placeList != null) {
                                   containerList.insert(
                                       0,
                                       DbContainerData(
                                           uniqueId: "no-container",
-                                          title: "(No Container)",
+                                          title: "(No Container or Place)",
                                           date: "2022-01-01",
-                                          description: "(No Container)"));
-                                  return containerListPicker(containerList, controller);
+                                          description: "(No Container or Place)"));
+                                  return containerListPicker(containerList, placeList, controller);
                                 }
                               } else if (snapshot.hasError) {
                                 return Center(
@@ -107,14 +108,14 @@ class ItemDetailScreen extends StatelessWidget {
                                 ),
                                 hintText: 'Item Description'),
                           ),
-                          if (controller.currentContainer != null) ...[
-                            Text("Inside container: " + controller.currentContainer!.title),
+                          if (controller.currentContainerOrPlace != null) ...[
+                            Text('Inside ${controller.currentContainerOrPlace!.thingType == Differentiator.container ? "container" : "place"}: ${controller.currentContainerOrPlace!.title}'),
                             ElevatedButton(
                               onPressed: () {
                                 Get.delete<ItemDetailScreen>();
-                                Get.to(ContainerDetailScreen(containerId: controller.currentContainer!.uniqueId)); // 2022-10-08 let route stack build
+                                Get.to(ContainerDetailScreen(containerId: controller.currentContainerOrPlace!.uniqueId)); // 2022-10-08 let route stack build
                               },
-                              child: const Text('Go to Container'),
+                              child: Text('Go to ${controller.currentContainerOrPlace!.thingType == Differentiator.container ? "Container" : "Place"}'),
                             ),
                           ]
                         ],
@@ -128,27 +129,44 @@ class ItemDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget containerListPicker(List<DbContainerData> containerList, ItemDetailScreenController controller) {
-    return DropdownButtonFormField<DbContainerData>(
-      value: controller.currentContainer ?? containerList[0],
+  Widget containerListPicker(List<DbContainerData> containerList, List<DbPlaceData> placeList, ItemDetailScreenController controller) {
+    List<GenericItemContainerOrPlace> theList = [];
+
+    for (var x in containerList) {
+      theList.add(GenericItemContainerOrPlace(x.uniqueId, x.title, x.description, x.date, Differentiator.container));
+    }
+
+    for (var x in placeList) {
+      theList.add(GenericItemContainerOrPlace(x.uniqueId, x.title, x.description, x.date, Differentiator.place));
+    }
+
+    var index = 0; // 2022-10-13 This feels like it isn't really needed, but it is. Would be nice if this could be gone one day.
+
+    if (controller.currentContainerOrPlace != null && controller.currentContainerOrPlace!.uniqueId != null)
+    {
+      index = theList.indexWhere((element) => element.uniqueId == controller.currentContainerOrPlace!.uniqueId);
+    }
+
+    return DropdownButtonFormField<GenericItemContainerOrPlace>(
+      value: theList[index],
       decoration: const InputDecoration(
         icon: Icon(Icons.widgets),
-        hintText: 'Select container',
-        labelText: 'Container *',
+        hintText: 'Select container or place',
+        labelText: 'Container or Place *',
       ),
       icon: const Icon(Icons.arrow_downward),
       iconSize: 24,
       elevation: 16,
       style: const TextStyle(color: Colors.deepPurple),
-      onChanged: (DbContainerData? newValue) {
+      onChanged: (GenericItemContainerOrPlace? newValue) {
         if (newValue?.uniqueId == "no-container") {
-          controller.selectedContainer = null;
+          controller.selectedContainerOrPlace = null;
         } else {
-          controller.selectedContainer = newValue?.uniqueId;
+          controller.selectedContainerOrPlace = newValue?.uniqueId;
         }
       },
-      items: containerList.map((DbContainerData container) {
-        return DropdownMenuItem<DbContainerData>(
+      items: theList.map((GenericItemContainerOrPlace container) {
+        return DropdownMenuItem<GenericItemContainerOrPlace>(
           value: container,
           child: Row(
             children: <Widget>[
@@ -187,7 +205,7 @@ class ItemDetailScreen extends StatelessWidget {
           onPressed: () {
             _saveToDb(
                 itemId,
-                controller.selectedContainer == null ? "" : controller.selectedContainer!,
+                controller.selectedContainerOrPlace == null ? "" : controller.selectedContainerOrPlace!,
                 controller.titleEditingController.text,
                 controller.descriptionEditingController.text);
           },
@@ -209,8 +227,8 @@ class ItemDetailScreen extends StatelessWidget {
     );
   }
 
-  Future<List<DbContainerData>> _getContainersFromDatabase() async {
-    return await appDatabase.getAllContainers();
+  Future<ContainersAndPlaces> _getContainersAndPlacesFromDatabase() async {
+    return await appDatabase.getAllContainersAndPlaces();
   }
 
   void _saveToDb(String itemId, String containerId, String title, String description) {
