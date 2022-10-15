@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:thing_finder/screen/containers_screen.dart';
 import 'package:thing_finder/screen/items_screen.dart';
+import 'package:thing_finder/screen/places_screen.dart';
 import 'package:thing_finder/util/app_drawer.dart';
 
 class SearchScreenController extends GetxController {
@@ -61,13 +62,27 @@ class SearchScreen extends StatelessWidget {
                         controller.setValue(value.toString());
                       }),
                 ),
+                ListTile(
+                  title: const Text("Place"),
+                  leading: Radio(
+                      value: "place",
+                      groupValue: controller.searchType,
+                      onChanged: (value) {
+                        controller.setValue(value.toString());
+                      }),
+                ),
                 ElevatedButton(
                   child: const Text('Search'),
                   onPressed: () {
                     if (controller.searchType == "item") {
                       Get.delete<SearchScreenController>(); // important. resets controller so values aren't retained
                       Get.to(ItemsScreen(searchText: controller.searchController.text, containerId: "")); // 2022-10-08 let route stack build
-                    } else {
+                    }
+                    else if (controller.searchType == "place") {
+                      Get.delete<SearchScreenController>(); // important. resets controller so values aren't retained
+                      Get.to(PlacesScreen(searchText: controller.searchController.text)); // 2022-10-08 let route stack build
+                    }
+                    else {
                       Get.delete<SearchScreenController>(); // important. resets controller so values aren't retained
                       Get.to(ContainersScreen(searchText: controller.searchController.text)); // 2022-10-08 let route stack build
                     }

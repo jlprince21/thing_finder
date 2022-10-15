@@ -211,7 +211,7 @@ class DatabaseToolsScreen extends StatelessWidget {
 
     } else {
       // User canceled the picker
-      print("Failed");
+      print("User canceled file picker");
     }
   }
 

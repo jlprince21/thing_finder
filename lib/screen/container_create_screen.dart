@@ -8,6 +8,7 @@ import 'package:thing_finder/screen/containers_screen.dart';
 class ContainerCreateScreenController extends GetxController {
   var titleEditingController = TextEditingController();
   var descriptionEditingController = TextEditingController();
+  String? selectedPlace;
 
   @override
   void dispose() {
@@ -33,6 +34,36 @@ class ContainerCreateScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         child: Column(
           children: [
+            FutureBuilder<List<DbPlaceData>>(
+              future: _getPlacesFromDatabase(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  List<DbPlaceData>? placeList = snapshot.data;
+                  if (placeList != null) {
+                    placeList.insert(
+                        0,
+                        DbPlaceData(
+                            uniqueId: "no-place",
+                            title: "(No Place)",
+                            date: "2022-01-01",
+                            description: "(No Place)"));
+                    return placeListPicker(placeList, controller);
+                  }
+                } else if (snapshot.hasError) {
+                  return Center(
+                      child: Text(
+                    snapshot.error.toString(),
+                    style: Theme.of(context).textTheme.bodyText2,
+                  ));
+                }
+                return Center(
+                  child: Text(
+                    'Click on add button to create new item',
+                    style: Theme.of(context).textTheme.bodyText2,
+                  ),
+                );
+              },
+            ),
             TextFormField(
               controller: controller.titleEditingController,
               decoration: InputDecoration(
@@ -61,6 +92,45 @@ class ContainerCreateScreen extends StatelessWidget {
     );
   }
 
+  Widget placeListPicker(
+      List<DbPlaceData> placeList, ContainerCreateScreenController controller) {
+    return DropdownButtonFormField<DbPlaceData>(
+      value: placeList[0],
+      decoration: const InputDecoration(
+        icon: Icon(Icons.widgets),
+        hintText: 'Select place',
+        labelText: 'Place *',
+      ),
+      icon: const Icon(Icons.arrow_downward),
+      iconSize: 24,
+      elevation: 16,
+      style: const TextStyle(color: Colors.deepPurple),
+      onChanged: (DbPlaceData? newValue) {
+        if (newValue?.uniqueId == "no-place") {
+          controller.selectedPlace = null;
+        } else {
+          controller.selectedPlace = newValue?.uniqueId;
+        }
+      },
+      items: placeList.map((DbPlaceData place) {
+        return DropdownMenuItem<DbPlaceData>(
+          value: place,
+          child: Row(
+            children: <Widget>[
+              const SizedBox(
+                width: 10,
+              ),
+              Text(
+                place.title,
+                style: TextStyle(color: Colors.black),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   _getDetailAppBar(ContainerCreateScreenController controller) {
     return AppBar(
       elevation: 0,
@@ -80,7 +150,9 @@ class ContainerCreateScreen extends StatelessWidget {
       actions: [
         IconButton(
           onPressed: () {
-            _saveToDb(controller.titleEditingController.text, controller.descriptionEditingController.text);
+            _saveToDb(controller.titleEditingController.text,
+                      controller.descriptionEditingController.text,
+                      controller.selectedPlace);
           },
           icon: const Icon(
             Icons.save,
@@ -91,12 +163,16 @@ class ContainerCreateScreen extends StatelessWidget {
     );
   }
 
-  void _saveToDb(String title, String description) {
+  Future<List<DbPlaceData>> _getPlacesFromDatabase() async {
+    return await appDatabase.getAllPlaces();
+  }
+
+  void _saveToDb(String title, String description, String? placeId) {
     appDatabase
         .createContainer(
             title,
-            description
-            )
+            description,
+            placeId)
         .then((value) {
       Get.delete<ContainerCreateScreenController>(); // important. resets controller so values aren't retained after creating a container and making another
       Get.offAll(ContainersScreen(searchText: ""));

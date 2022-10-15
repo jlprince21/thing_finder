@@ -5,6 +5,7 @@ import '../screen/containers_screen.dart';
 import '../screen/database_tools_screen.dart';
 import '../screen/items_screen.dart';
 import '../screen/main_menu_screen.dart';
+import '../screen/places_screen.dart';
 import '../screen/search_screen.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -84,6 +85,16 @@ class AppDrawer extends StatelessWidget {
         onTap: () {
           // 2022-10-08 let route stack build
           Get.to(ContainersScreen(searchText: ""), preventDuplicates: false); // preventDuplicates allows us to return to items/containers page after search
+        },
+      ),
+    );
+
+    menuEntries.add(
+      ListTile(
+        title: const Text('Places'),
+        onTap: () {
+          // 2022-10-08 let route stack build
+          Get.to(PlacesScreen(searchText: ""), preventDuplicates: false); // preventDuplicates allows us to return to items/containers page after search
         },
       ),
     );

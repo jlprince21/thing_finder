@@ -7,7 +7,7 @@ import 'package:thing_finder/screen/items_screen.dart';
 class ItemCreateScreenController extends GetxController {
   var titleEditingController = TextEditingController();
   var descriptionEditingController = TextEditingController();
-  String? selectedContainer;
+  String? selectedContainerOrPlace;
 
   @override
   void dispose() {
@@ -31,20 +31,21 @@ class ItemCreateScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         child: Column(
           children: [
-            FutureBuilder<List<DbContainerData>>(
-              future: _getContainersFromDatabase(),
+            FutureBuilder<ContainersAndPlaces>(
+              future: _getContainersAndPlacesFromDatabase(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  List<DbContainerData>? containerList = snapshot.data;
-                  if (containerList != null) {
+                  List<DbContainerData>? containerList = snapshot.data!.containers;
+                  List<DbPlaceData>? placeList = snapshot.data!.places;
+                  if (containerList != null || placeList != null) {
                     containerList.insert(
                         0,
                         DbContainerData(
                             uniqueId: "no-container",
-                            title: "(No Container)",
+                            title: "(No Container or Place)",
                             date: "2022-01-01",
-                            description: "(No Container)"));
-                    return containerListPicker(containerList, controller);
+                            description: "(No Container or Place)"));
+                    return containerListPicker(containerList, placeList, controller);
                   }
                 } else if (snapshot.hasError) {
                   return Center(
@@ -89,28 +90,37 @@ class ItemCreateScreen extends StatelessWidget {
     );
   }
 
-  Widget containerListPicker(
-      List<DbContainerData> containerList, ItemCreateScreenController controller) {
-    return DropdownButtonFormField<DbContainerData>(
-      value: containerList[0],
+  Widget containerListPicker(List<DbContainerData> containerList, List<DbPlaceData> placeList, ItemCreateScreenController controller) {
+    List<GenericItemContainerOrPlace> theList = [];
+
+    for (var x in containerList) {
+      theList.add(GenericItemContainerOrPlace(x.uniqueId, x.title, x.description, x.date, Differentiator.container));
+    }
+
+    for (var x in placeList) {
+      theList.add(GenericItemContainerOrPlace(x.uniqueId, x.title, x.description, x.date, Differentiator.place));
+    }
+
+    return DropdownButtonFormField<GenericItemContainerOrPlace>(
+      value: theList[0],
       decoration: const InputDecoration(
         icon: Icon(Icons.widgets),
-        hintText: 'Select container',
-        labelText: 'Container *',
+        hintText: 'Select container or place',
+        labelText: 'Container or Place *',
       ),
       icon: const Icon(Icons.arrow_downward),
       iconSize: 24,
       elevation: 16,
       style: const TextStyle(color: Colors.deepPurple),
-      onChanged: (DbContainerData? newValue) {
+      onChanged: (GenericItemContainerOrPlace? newValue) {
         if (newValue?.uniqueId == "no-container") {
-          controller.selectedContainer = null;
+          controller.selectedContainerOrPlace = null;
         } else {
-          controller.selectedContainer = newValue?.uniqueId;
+          controller.selectedContainerOrPlace = newValue?.uniqueId;
         }
       },
-      items: containerList.map((DbContainerData container) {
-        return DropdownMenuItem<DbContainerData>(
+      items: theList.map((GenericItemContainerOrPlace container) {
+        return DropdownMenuItem<GenericItemContainerOrPlace>(
           value: container,
           child: Row(
             children: <Widget>[
@@ -148,7 +158,8 @@ class ItemCreateScreen extends StatelessWidget {
         IconButton(
           onPressed: () {
             _saveToDb(controller.titleEditingController.text,
-                controller.descriptionEditingController.text, controller.selectedContainer);
+                      controller.descriptionEditingController.text,
+                      controller.selectedContainerOrPlace);
           },
           icon: const Icon(
             Icons.save,
@@ -159,8 +170,8 @@ class ItemCreateScreen extends StatelessWidget {
     );
   }
 
-  Future<List<DbContainerData>> _getContainersFromDatabase() async {
-    return await appDatabase.getAllContainers();
+  Future<ContainersAndPlaces> _getContainersAndPlacesFromDatabase() async {
+    return await appDatabase.getAllContainersAndPlaces();
   }
 
   void _saveToDb(String title, String description, String? containerId) {
