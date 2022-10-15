@@ -137,22 +137,11 @@ class AppDatabase extends _$AppDatabase {
     return await update(dbLocation).replace(DbLocationData(date: DateFormat.yMMMd().format(DateTime.now()), uniqueId: theMap.uniqueId, insideId: placeId, objectId: dbContainerData.uniqueId));
   }
 
-  // delete container
-  // Future<int> deleteContainer(DbContainerData dbContainerData) async {
-  //   (update(dbItem)
-  //     ..where((t) => t.container.equals(dbContainerData.uniqueId))
-  //   ).write(DbItemCompanion(
-  //     container: Value(null),
-  //   ));
-
-  //   return await delete(dbContainer).delete(dbContainerData);
-  // }
-
   // delete container by id
   Future<int> deleteContainerById(String containerId) async {
     await (delete(dbContainer)..where((t) => t.uniqueId.equals(containerId))).go();
-    await (update(dbLocation)..where((t) => t.insideId.equals(containerId))).write(DbLocationCompanion(insideId: Value(null))); // item in container
-    await (update(dbLocation)..where((t) => t.objectId.equals(containerId))).write(DbLocationCompanion(insideId: Value(null))); // container in a location (future plans) TODO should this be a delete instead?
+    await (delete(dbLocation)..where((t) => t.insideId.equals(containerId))).go(); // item in container
+    await (delete(dbLocation)..where((t) => t.objectId.equals(containerId))).go(); // container in a location (future plans)
     return await (delete(dbIndex)..where((t) => t.uniqueId.equals(containerId))).go();
   }
 
@@ -161,16 +150,33 @@ class AppDatabase extends _$AppDatabase {
     return await (select(dbContainer)..where((tbl) => tbl.uniqueId.equals(containerId))).getSingle();
   }
 
-    // get specific container with enough data needed for the container details screen
+  // get specific container with enough data needed for the container details screen
   Future<ContainerMapped> getContainerDetails(String containerId) async {
     // TODO 2022-05-17 try Drift join syntax someday...
     var theContainer = await (select(dbContainer)..where((t) => t.uniqueId.equals(containerId))).getSingle();
-    var theMap = await  (select(dbLocation)..where((t) => t.objectId.equals(containerId))).getSingle();
+
+    DbLocationData? theMap = null;
+
+    try {
+      theMap = await  (select(dbLocation)..where((t) => t.objectId.equals(containerId))).getSingleOrNull();
+    }
+    catch (e)
+    {
+      // 2022-10-15 TODO For old versions of code this removes duplicate rows
+      // dedicated to a single item/container caused in previous query. It would
+      // be nice to remove the need for this someday.
+      await (delete(dbLocation)..where((t) => t.objectId.equals(containerId))).go();
+    }
 
     DbPlaceData? thePlace;
     if (theMap != null && theMap.insideId != null)
     {
-      thePlace = await  (select(dbPlace)..where((t) => t.uniqueId.equals(theMap.insideId!))).getSingle();
+      thePlace = await  (select(dbPlace)..where((t) => t.uniqueId.equals(theMap!.insideId!))).getSingle();
+    }
+    else if (theMap == null)
+    {
+      // prevent missing row for Location table
+      createLocationForObjectOnly(containerId);
     }
 
     var results = ContainerMapped(theContainer, theMap, thePlace);
@@ -214,11 +220,6 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // update item
-  // Future<bool> updateItem(DbItemData dbItemData) async {
-  //   return await update(dbItem).replace(dbItemData);
-  // }
-
-  // update item
   Future<bool> updateItem(DbItemData dbItemData, String? containerId) async {
     await update(dbItem).replace(dbItemData);
 
@@ -226,16 +227,6 @@ class AppDatabase extends _$AppDatabase {
 
     return await update(dbLocation).replace(DbLocationData(date: DateFormat.yMMMd().format(DateTime.now()), uniqueId: theMap.uniqueId, insideId: containerId, objectId: dbItemData.uniqueId));
   }
-
-  // delete item
-  // Future<int> deleteItem(DbItemData dbItemData) async {
-  //   return await delete(dbItem).delete(dbItemData);
-  // }
-
-  // delete item by id
-  // Future<int> deleteItemById(String itemId) async {
-  //   return await (delete(dbItem)..where((t) => t.uniqueId.equals(itemId))).go();
-  // }
 
   // delete item by id
   Future<int> deleteItemById(String itemId) async {
@@ -253,12 +244,29 @@ class AppDatabase extends _$AppDatabase {
   Future<ItemMapped> getItemDetails(String itemId) async {
     // TODO 2022-05-17 try Drift join syntax someday...
     var theItem = await (select(dbItem)..where((t) => t.uniqueId.equals(itemId))).getSingle();
-    var theMap = await  (select(dbLocation)..where((t) => t.objectId.equals(itemId))).getSingle();
+
+    DbLocationData? theMap = null;
+
+    try {
+      theMap = await  (select(dbLocation)..where((t) => t.objectId.equals(itemId))).getSingleOrNull();
+    }
+    catch (e)
+    {
+      // 2022-10-15 TODO For old versions of code this removes duplicate rows
+      // dedicated to a single item/container caused in previous query. It would
+      // be nice to remove the need for this someday.
+      await (delete(dbLocation)..where((t) => t.objectId.equals(itemId))).go();
+    }
 
     GenericItemContainerOrPlace? theContainerOrPlace;
     if (theMap != null && theMap.insideId != null)
     {
       theContainerOrPlace = await getContainerOrPlace(theMap.insideId!);
+    }
+    else if (theMap == null)
+    {
+      // prevent missing row for Location table
+      createLocationForObjectOnly(itemId);
     }
 
     var results = ItemMapped(theItem, theMap, theContainerOrPlace);
@@ -272,6 +280,16 @@ class AppDatabase extends _$AppDatabase {
   // import location
   Future<int> importLocation(DbLocationCompanion dbLocationCompanion) async {
     return await into(dbLocation).insert(dbLocationCompanion);
+  }
+
+  Future<int> createLocationForObjectOnly(String objectId) async {
+    // 2022-10-15 if a place or container has been deleted, it will have rows deleted
+    // in Location table. Items and Containers will need empty rows re-created
+    // from time to time and this method is a lazy alternative to iterating over
+    // all of them each time one is deleted.
+    var date = DateFormat.yMMMd().format(DateTime.now());
+    var uuid = const Uuid();
+    return await into(dbLocation).insert(DbLocationCompanion(date: Value(date), objectId: Value(objectId), insideId: Value(null), uniqueId: Value(uuid.v4())));
   }
 
   /* ---------------------------------------------------------------------------
@@ -299,8 +317,7 @@ class AppDatabase extends _$AppDatabase {
   // delete place by id
   Future<int> deletePlaceById(String placeId) async {
     await (delete(dbPlace)..where((t) => t.uniqueId.equals(placeId))).go();
-    await (update(dbLocation)..where((t) => t.insideId.equals(placeId))).write(DbLocationCompanion(insideId: Value(null))); // item or container in a place TODO should this be a delete instead?
-    // await (update(dbLocation)..where((t) => t.objectId.equals(containerId))).write(DbLocationCompanion(insideId: Value(null))); // container in a location (future plans) TODO should this be a delete instead?
+    await (delete(dbLocation)..where((t) => t.insideId.equals(placeId))).go(); // item or container in a place
     return await (delete(dbIndex)..where((t) => t.uniqueId.equals(placeId))).go();
   }
 

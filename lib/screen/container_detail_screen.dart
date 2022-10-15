@@ -109,7 +109,10 @@ class ContainerDetailScreen extends StatelessWidget {
                                 hintText: 'Container Description'),
                           ),
                           if (controller.currentPlace != null) ...[
-                            Text("Inside place: " + controller.currentPlace!.title),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Text("Inside place: " + controller.currentPlace!.title),
+                            ),
                             ElevatedButton(
                               onPressed: () {
                                 Get.delete<ContainerDetailScreen>();
@@ -117,7 +120,8 @@ class ContainerDetailScreen extends StatelessWidget {
                               },
                               child: const Text('Go to Place'),
                             ),
-                          ]
+                          ],
+                          Column(children: getContainerDetailWidgets(controller),),
                         ],
                       ));
                 });
@@ -129,51 +133,53 @@ class ContainerDetailScreen extends StatelessWidget {
     );
   }
 
-  Future<DbContainerData> _getContainerFromDatabase(String containerId) async {
-    return await appDatabase.getContainer(containerId);
-  }
-
   getContainerDetailWidgets(ContainerDetailScreenController controller) {
     List<Widget> detailWidgets = <Widget>[];
 
-    detailWidgets.add(
-      TextFormField(
-        controller: controller.titleEditingController,
-        decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
-            hintText: 'Container Title'),
-      ),
-    );
+    // TODO 2022-10-15 may change back to this instead of raft of widgets above,
+    // keep for a while.
+
+    // detailWidgets.add(
+    //   TextFormField(
+    //     controller: controller.titleEditingController,
+    //     decoration: InputDecoration(
+    //         border: OutlineInputBorder(
+    //           borderRadius: BorderRadius.circular(5),
+    //         ),
+    //         hintText: 'Container Title'),
+    //   ),
+    // );
+
+    // detailWidgets.add(
+    //   const SizedBox(
+    //     height: 20,
+    //   ),
+    // );
+
+    // detailWidgets.add(
+    //   TextFormField(
+    //     controller: controller.descriptionEditingController,
+    //     maxLength: 100,
+    //     minLines: 4,
+    //     maxLines: 6,
+    //     decoration: InputDecoration(
+    //         border: OutlineInputBorder(
+    //           borderRadius: BorderRadius.circular(5),
+    //         ),
+    //         hintText: 'Container Description'),
+    //   ),
+    // );
 
     detailWidgets.add(
-      const SizedBox(
-        height: 20,
-      ),
-    );
-
-    detailWidgets.add(
-      TextFormField(
-        controller: controller.descriptionEditingController,
-        maxLength: 100,
-        minLines: 4,
-        maxLines: 6,
-        decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
-            hintText: 'Container Description'),
-      ),
-    );
-
-    detailWidgets.add(
-      ElevatedButton(
-        onPressed: () {
-          Get.delete<ContainerDetailScreenController>(); // important. resets controller so values aren't retained
-          Get.to(ItemsScreen(searchText: "", containerId: containerId)); // 2022-10-08 let route stack build
-        },
-        child: const Text('View Contents'),
+      Padding(
+        padding: const EdgeInsets.only(top: 8.0),
+        child: ElevatedButton(
+          onPressed: () {
+            Get.delete<ContainerDetailScreenController>(); // important. resets controller so values aren't retained
+            Get.to(ItemsScreen(searchText: "", containerId: containerId)); // 2022-10-08 let route stack build
+          },
+          child: const Text('View Contents'),
+        ),
       ),
     );
 
