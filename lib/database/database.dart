@@ -296,6 +296,11 @@ class AppDatabase extends _$AppDatabase {
    * Places
    * -------------------------------------------------------------------------*/
 
+  // import place
+  Future<int> importPlace(DbPlaceCompanion dbPlaceCompanion) async {
+    return await into(dbPlace).insert(dbPlaceCompanion);
+  }
+
   // retrieve all places
   Future<List<DbPlaceData>> getAllPlaces() async {
     return await (select(dbPlace)..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
@@ -341,7 +346,7 @@ class AppDatabase extends _$AppDatabase {
    * -------------------------------------------------------------------------*/
 
   // import type
-  Future<int> importType(DbIndexCompanion dbIndexCompanion) async {
+  Future<int> importIndex(DbIndexCompanion dbIndexCompanion) async {
     return await into(dbIndex).insert(dbIndexCompanion);
   }
 
@@ -399,8 +404,8 @@ class AppDatabase extends _$AppDatabase {
       ids.add(element.objectId ?? "");
     });
 
-    var items = await (select(dbItem)..where((tbl) => tbl.uniqueId.isIn(ids))).get();
-    var containers = await (select(dbContainer)..where((tbl) => tbl.uniqueId.isIn(ids))).get();
+    var items = await (select(dbItem)..where((tbl) => tbl.uniqueId.isIn(ids))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
+    var containers = await (select(dbContainer)..where((tbl) => tbl.uniqueId.isIn(ids))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
 
     List<GenericItemContainerOrPlace> theList = [];
 
@@ -415,6 +420,14 @@ class AppDatabase extends _$AppDatabase {
     return theList;
   }
 
+  deleteAllData()
+  {
+    delete(dbPlace).go();
+    delete(dbItem).go();
+    delete(dbContainer).go();
+    delete(dbLocation).go();
+    delete(dbIndex).go();
+  }
 }
 
 class ContainersAndPlaces {

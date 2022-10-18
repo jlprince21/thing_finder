@@ -32,6 +32,20 @@ class DatabaseToolsScreen extends StatelessWidget {
           ),
 
           // ListTile(
+          //   title: const Text('Sample Data'),
+          //   onTap: () {
+          //     _populateSampleData();
+          //   },
+          // ),
+
+          // ListTile(
+          //   title: const Text('Delete Data'),
+          //   onTap: () {
+          //     _deleteAllData();
+          //   },
+          // ),
+
+          // ListTile(
           //   title: const Text('Import Containers to DB'),
           //   onTap: () {
           //     _pickFile("container");
@@ -82,6 +96,127 @@ class DatabaseToolsScreen extends StatelessWidget {
     );
   }
 
+  _populateSampleData()
+  {
+    var date = 'Oct 1, 2022';
+
+    // places (c)
+    const garageId = 'test0c00-47d0-4dc1-8023-5533eccb5c00';
+    _importIndex(garageId, Differentiator.place.value);
+    _importPlace(garageId, 'Garage', 'The garage', date);
+
+    const bedroomClosetId = 'test0c01-47d0-4dc1-8023-5533eccb5c00';
+    _importIndex(bedroomClosetId, Differentiator.place.value);
+    _importPlace(bedroomClosetId, 'Bedroom Closet', 'The bedroom closet', date);
+
+    // containers (b)
+
+    const hatBoxId = 'test0b00-47d0-4dc1-8023-5533eccb5c00';
+    _importIndex(hatBoxId, Differentiator.container.value);
+    _importContainer(hatBoxId, 'Hat Box', 'The box where I keep my hats', date);
+    _importLocation('test0d03-47d0-4dc1-8023-5533eccb5d00', hatBoxId, bedroomClosetId, date); // inside bedroom closet
+
+    const toolBoxId = 'test0b01-47d0-4dc1-8023-5533eccb5c00';
+    _importIndex(toolBoxId, Differentiator.container.value);
+    _importContainer(toolBoxId, 'Tool Box', 'Box I keep tools in', date);
+    _importLocation('test0d06-47d0-4dc1-8023-5533eccb5d00', toolBoxId, garageId, date); // inside garage
+
+    // items (a)
+    const bicycleId = 'test0a00-47d0-4dc1-8023-5533eccb5a00';
+    _importIndex(bicycleId, Differentiator.item.value);
+    _importItem(bicycleId, 'Bicycle', 'My red bicycle', date);
+    _importLocation('test0d00-47d0-4dc1-8023-5533eccb5d00', bicycleId, garageId, date); // inside garage
+
+    const hatRedId = 'test0a01-47d0-4dc1-8023-5533eccb5a00';
+    _importIndex(hatRedId, Differentiator.item.value);
+    _importItem(hatRedId, 'Red Hat', 'My red hat', date);
+    _importLocation('test0d01-47d0-4dc1-8023-5533eccb5d00', hatRedId, hatBoxId, date); // inside hat box
+
+    const hatGreenId = 'test0a02-47d0-4dc1-8023-5533eccb5a00';
+    _importIndex(hatGreenId, Differentiator.item.value);
+    _importItem(hatGreenId, 'Green Hat', 'My green hat', date);
+    _importLocation('test0d02-47d0-4dc1-8023-5533eccb5d00', hatGreenId, hatBoxId, date); // inside hat box
+
+    const trackShoesId = 'test0a03-47d0-4dc1-8023-5533eccb5a00';
+    _importIndex(trackShoesId, Differentiator.item.value);
+    _importItem(trackShoesId, 'Track Shoes', 'My track running shoes', date);
+    _importLocation('test0d04-47d0-4dc1-8023-5533eccb5d00', trackShoesId, bedroomClosetId, date); // inside bedroom closet
+
+    const suspendersId = 'test0a04-47d0-4dc1-8023-5533eccb5a00';
+    _importIndex(suspendersId, Differentiator.item.value);
+    _importItem(suspendersId, 'Suspenders', 'My red pair of pants suspenders', date);
+    _importLocation('test0d05-47d0-4dc1-8023-5533eccb5d00', suspendersId, bedroomClosetId, date); // inside bedroom closet
+
+    const hammerId = 'test0a05-47d0-4dc1-8023-5533eccb5a00';
+    _importIndex(hammerId, Differentiator.item.value);
+    _importItem(hammerId, 'Hammer', 'My claw hammer', date);
+    _importLocation('test0d07-47d0-4dc1-8023-5533eccb5d00', hammerId, toolBoxId, date); // inside toolbox
+
+    const screwdriverId = 'test0a06-47d0-4dc1-8023-5533eccb5a00';
+    _importIndex(screwdriverId, Differentiator.item.value);
+    _importItem(screwdriverId, 'Screwdriver', 'My flathead screwdriver', date);
+    _importLocation('test0d08-47d0-4dc1-8023-5533eccb5d00', screwdriverId, toolBoxId, date); // inside toolbox
+
+    // locations (d)
+  }
+
+  _importItem(String uniqueId, String title, String? description, String date)
+  {
+    appDatabase.importItem(DbItemCompanion(
+      uniqueId: dr.Value(uniqueId),
+      title: dr.Value(title),
+      description: description == null ? dr.Value(null) : dr.Value(description),
+      date: dr.Value(date),
+    ));
+  }
+
+  _importContainer(String containerId, String containerTitle, String? containerDescription, String date)
+  {
+    appDatabase
+      .importContainer(DbContainerCompanion(
+        uniqueId: dr.Value(containerId),
+        title: dr.Value(containerTitle),
+        description: containerDescription == null ? dr.Value(null) : dr.Value(containerDescription),
+        date: dr.Value(date),
+        ));
+  }
+
+  _importIndex(String indexId, int type)
+  {
+    appDatabase
+      .importIndex(DbIndexCompanion(
+        uniqueId: dr.Value(indexId!),
+        type: dr.Value(type),
+        ));
+  }
+
+  _importPlace(String uniqueId, String title, String? description, String date)
+  {
+    appDatabase
+      .importPlace(DbPlaceCompanion(
+        uniqueId: dr.Value(uniqueId),
+        title: dr.Value(title),
+        description: description == null ? dr.Value(null) : dr.Value(description),
+        date: dr.Value(date),
+      ));
+  }
+
+  _importLocation(String uniqueId, String objectId, String insideId, String date)
+  {
+    appDatabase
+      .importLocation(DbLocationCompanion(
+        uniqueId: dr.Value(uniqueId),
+        objectId: dr.Value(objectId),
+        insideId: dr.Value(insideId),
+        date: dr.Value(date),
+        ));
+  }
+
+  _deleteAllData()
+  {
+    appDatabase.deleteAllData();
+  }
+
   _createContainer(String line) {
     // TODO using a CSV parser may make this easier
     final split = line.split('|');
@@ -118,7 +253,7 @@ class DatabaseToolsScreen extends StatelessWidget {
     final type = int.tryParse(values[1]!); // TODO 2022-05-21 risky code here
 
     appDatabase
-      .importType(DbIndexCompanion(
+      .importIndex(DbIndexCompanion(
         uniqueId: dr.Value(indexId!),
         type: dr.Value(type!),
         ));
