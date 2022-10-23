@@ -31,19 +31,68 @@ class DatabaseToolsScreen extends StatelessWidget {
             },
           ),
 
-          // ListTile(
-          //   title: const Text('Sample Data'),
-          //   onTap: () {
-          //     _populateSampleData();
-          //   },
-          // ),
+          ListTile(
+            title: const Text('Populate Sample Data'),
+            onTap: () {
+              var alert = AlertDialog(
+                title: const Text('Populate Data Confirmation'),
+                content: const Text('Do you want to populate sample data?'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      _populateSampleData();
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Populate'),
+                  ),
+              ],);
 
-          // ListTile(
-          //   title: const Text('Delete Data'),
-          //   onTap: () {
-          //     _deleteAllData();
-          //   },
-          // ),
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return alert;
+                },
+              );
+            },
+          ),
+
+          ListTile(
+            title: const Text('Delete All Data'),
+            onTap: () {
+              var alert = AlertDialog(
+                title: const Text('Delete Confirmation'),
+                content: const Text('Do you really want to delete all data?'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      _deleteAllData();
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Delete'),
+                  ),
+              ],);
+
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return alert;
+                },
+              );
+
+            },
+          ),
 
           // ListTile(
           //   title: const Text('Import Containers to DB'),
