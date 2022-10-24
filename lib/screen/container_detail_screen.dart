@@ -7,19 +7,7 @@ import 'package:thing_finder/screen/containers_screen.dart';
 import 'package:thing_finder/screen/items_screen.dart';
 import 'package:thing_finder/screen/place_detail_screen.dart';
 
-class ContainerDetailScreenController extends GetxController {
-  var titleEditingController = TextEditingController();
-  var descriptionEditingController = TextEditingController();
-  DbPlaceData? currentPlace;
-  String? selectedPlace = null;
-
-  @override
-  void dispose() {
-    titleEditingController.dispose();
-    descriptionEditingController.dispose();
-    super.dispose();
-  }
-}
+import '../common/container_common.dart';
 
 class ContainerDetailScreen extends StatelessWidget {
   late AppDatabase appDatabase;
@@ -30,7 +18,7 @@ class ContainerDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     appDatabase = Provider.of<AppDatabase>(context);
-    final controller = Get.put(ContainerDetailScreenController());
+    final controller = Get.put(ContainerScreensController());
 
     return Scaffold(
       appBar: _getDetailAppBar(context, controller, containerId),
@@ -57,7 +45,7 @@ class ContainerDetailScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           FutureBuilder<List<DbPlaceData>>(
-                            future: _getPlacesFromDatabase(),
+                            future: getPlacesFromDatabase(appDatabase),
                             builder: (context, snapshot) {
                               if (snapshot.hasData) {
                                 List<DbPlaceData>? placeList = snapshot.data;
@@ -86,28 +74,9 @@ class ContainerDetailScreen extends StatelessWidget {
                               );
                             },
                           ),
-                          TextFormField(
-                            controller: controller.titleEditingController,
-                            decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                hintText: 'Container Title'),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          TextFormField(
-                            controller: controller.descriptionEditingController,
-                            maxLength: 100,
-                            minLines: 4,
-                            maxLines: 6,
-                            decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                hintText: 'Container Description'),
-                          ),
+
+                          Column(children: getCommonContainerWidgets(controller),),
+
                           if (controller.currentPlace != null) ...[
                             Padding(
                               padding: const EdgeInsets.only(bottom: 8.0),
@@ -121,7 +90,17 @@ class ContainerDetailScreen extends StatelessWidget {
                               child: const Text('Go to Place'),
                             ),
                           ],
-                          Column(children: getContainerDetailWidgets(controller),),
+
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Get.delete<ContainerScreensController>(); // important. resets controller so values aren't retained
+                                Get.to(ItemsScreen(searchText: "", containerId: containerId)); // 2022-10-08 let route stack build
+                              },
+                              child: const Text('View Contents'),
+                            ),
+                          ),
                         ],
                       ));
                 });
@@ -133,98 +112,7 @@ class ContainerDetailScreen extends StatelessWidget {
     );
   }
 
-  getContainerDetailWidgets(ContainerDetailScreenController controller) {
-    List<Widget> detailWidgets = <Widget>[];
-
-    // TODO 2022-10-15 may change back to this instead of raft of widgets above,
-    // keep for a while.
-
-    // detailWidgets.add(
-    //   TextFormField(
-    //     controller: controller.titleEditingController,
-    //     decoration: InputDecoration(
-    //         border: OutlineInputBorder(
-    //           borderRadius: BorderRadius.circular(5),
-    //         ),
-    //         hintText: 'Container Title'),
-    //   ),
-    // );
-
-    // detailWidgets.add(
-    //   const SizedBox(
-    //     height: 20,
-    //   ),
-    // );
-
-    // detailWidgets.add(
-    //   TextFormField(
-    //     controller: controller.descriptionEditingController,
-    //     maxLength: 100,
-    //     minLines: 4,
-    //     maxLines: 6,
-    //     decoration: InputDecoration(
-    //         border: OutlineInputBorder(
-    //           borderRadius: BorderRadius.circular(5),
-    //         ),
-    //         hintText: 'Container Description'),
-    //   ),
-    // );
-
-    detailWidgets.add(
-      Padding(
-        padding: const EdgeInsets.only(top: 8.0),
-        child: ElevatedButton(
-          onPressed: () {
-            Get.delete<ContainerDetailScreenController>(); // important. resets controller so values aren't retained
-            Get.to(ItemsScreen(searchText: "", containerId: containerId)); // 2022-10-08 let route stack build
-          },
-          child: const Text('View Contents'),
-        ),
-      ),
-    );
-
-    return detailWidgets;
-  }
-
-  Widget placeListPicker(List<DbPlaceData> placeList, ContainerDetailScreenController controller) {
-    return DropdownButtonFormField<DbPlaceData>(
-      value: controller.currentPlace ?? placeList[0],
-      decoration: const InputDecoration(
-        icon: Icon(Icons.widgets),
-        hintText: 'Select place',
-        labelText: 'Place *',
-      ),
-      icon: const Icon(Icons.arrow_downward),
-      iconSize: 24,
-      elevation: 16,
-      style: const TextStyle(color: Colors.deepPurple),
-      onChanged: (DbPlaceData? newValue) {
-        if (newValue?.uniqueId == "no-place") {
-          controller.selectedPlace = null;
-        } else {
-          controller.selectedPlace = newValue?.uniqueId;
-        }
-      },
-      items: placeList.map((DbPlaceData place) {
-        return DropdownMenuItem<DbPlaceData>(
-          value: place,
-          child: Row(
-            children: <Widget>[
-              const SizedBox(
-                width: 10,
-              ),
-              Text(
-                place.title,
-                style: const TextStyle(color: Colors.black),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  _getDetailAppBar(BuildContext context, ContainerDetailScreenController controller, String containerId) {
+  _getDetailAppBar(BuildContext context, ContainerScreensController controller, String containerId) {
     return AppBar(
       elevation: 0,
       leading: IconButton(
@@ -267,10 +155,6 @@ class ContainerDetailScreen extends StatelessWidget {
     );
   }
 
-  Future<List<DbPlaceData>> _getPlacesFromDatabase() async {
-    return await appDatabase.getAllPlaces();
-  }
-
   void _saveToDb(String containerId, String placeId, String title, String description) {
     appDatabase
         .updateContainer(DbContainerData(
@@ -280,7 +164,7 @@ class ContainerDetailScreen extends StatelessWidget {
             date: DateFormat.yMMMd().format(DateTime.now())),
             placeId.isEmpty ? null : placeId)
         .then((value) {
-      Get.delete<ContainerDetailScreenController>(); // important. resets controller so values aren't retained
+      Get.delete<ContainerScreensController>(); // important. resets controller so values aren't retained
       Get.offAll(ContainersScreen(searchText: ""));
     });
   }
@@ -302,7 +186,7 @@ class ContainerDetailScreen extends StatelessWidget {
             TextButton(
               onPressed: () {
                 appDatabase.deleteContainerById(containerId).then((value) {
-                  Get.delete<ContainerDetailScreenController>(); // important. resets controller so values aren't retained
+                  Get.delete<ContainerScreensController>(); // important. resets controller so values aren't retained
                   Get.offAll(ContainersScreen(searchText: ""));
                 });
               },
