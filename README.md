@@ -8,6 +8,10 @@ Use `flutter run --release -d <DEVICE NAME HERE>` to get a launchable version
 running on a physical phone/tablet. On iOS 14 and above it won't run untethered
 otherwise.
 
+# iOS Building
+
+`flutter build ipa --obfuscate --split-debug-info=/build/debug_symbols/ios`
+
 # Android Code Signing
 
 [Google Docs](https://docs.flutter.dev/deployment/android#signing-the-app)
@@ -19,6 +23,7 @@ Make sure a copy of `key.properties`is in \[project]/android/key.properties.
 
 Build the app bundle with
 
+TODO: 2022-10-19 get obfuscation and split debug info working for Android.
 `flutter build appbundle`
 
 Output will be located at \[project]/build/app/outputs/bundle/release/app.aab

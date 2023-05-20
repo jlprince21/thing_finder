@@ -5,18 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/screen/containers_screen.dart';
 
-class ContainerCreateScreenController extends GetxController {
-  var titleEditingController = TextEditingController();
-  var descriptionEditingController = TextEditingController();
-  String? selectedPlace;
-
-  @override
-  void dispose() {
-    titleEditingController.dispose();
-    descriptionEditingController.dispose();
-    super.dispose();
-  }
-}
+import '../common/container_common.dart';
 
 class ContainerCreateScreen extends StatelessWidget {
   late AppDatabase appDatabase;
@@ -26,7 +15,7 @@ class ContainerCreateScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     appDatabase = Provider.of<AppDatabase>(context);
-    final controller = Get.put(ContainerCreateScreenController());
+    final controller = Get.put(ContainerScreensController());
 
     return Scaffold(
       appBar: _getDetailAppBar(controller),
@@ -35,7 +24,7 @@ class ContainerCreateScreen extends StatelessWidget {
         child: Column(
           children: [
             FutureBuilder<List<DbPlaceData>>(
-              future: _getPlacesFromDatabase(),
+              future: getPlacesFromDatabase(appDatabase),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   List<DbPlaceData>? placeList = snapshot.data;
@@ -64,74 +53,15 @@ class ContainerCreateScreen extends StatelessWidget {
                 );
               },
             ),
-            TextFormField(
-              controller: controller.titleEditingController,
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  hintText: 'Container Title'),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            TextFormField(
-              controller: controller.descriptionEditingController,
-              maxLength: 100,
-              minLines: 4,
-              maxLines: 6,
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  hintText: 'Container Description'),
-            ),
+
+            Column(children: getCommonContainerWidgets(controller),),
           ],
         ),
       ),
     );
   }
 
-  Widget placeListPicker(
-      List<DbPlaceData> placeList, ContainerCreateScreenController controller) {
-    return DropdownButtonFormField<DbPlaceData>(
-      value: placeList[0],
-      decoration: const InputDecoration(
-        icon: Icon(Icons.widgets),
-        hintText: 'Select place',
-        labelText: 'Place *',
-      ),
-      icon: const Icon(Icons.arrow_downward),
-      iconSize: 24,
-      elevation: 16,
-      style: const TextStyle(color: Colors.deepPurple),
-      onChanged: (DbPlaceData? newValue) {
-        if (newValue?.uniqueId == "no-place") {
-          controller.selectedPlace = null;
-        } else {
-          controller.selectedPlace = newValue?.uniqueId;
-        }
-      },
-      items: placeList.map((DbPlaceData place) {
-        return DropdownMenuItem<DbPlaceData>(
-          value: place,
-          child: Row(
-            children: <Widget>[
-              const SizedBox(
-                width: 10,
-              ),
-              Text(
-                place.title,
-                style: TextStyle(color: Colors.black),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  _getDetailAppBar(ContainerCreateScreenController controller) {
+  _getDetailAppBar(ContainerScreensController controller) {
     return AppBar(
       elevation: 0,
       leading: IconButton(
@@ -163,10 +93,6 @@ class ContainerCreateScreen extends StatelessWidget {
     );
   }
 
-  Future<List<DbPlaceData>> _getPlacesFromDatabase() async {
-    return await appDatabase.getAllPlaces();
-  }
-
   void _saveToDb(String title, String description, String? placeId) {
     appDatabase
         .createContainer(
@@ -174,7 +100,7 @@ class ContainerCreateScreen extends StatelessWidget {
             description,
             placeId)
         .then((value) {
-      Get.delete<ContainerCreateScreenController>(); // important. resets controller so values aren't retained after creating a container and making another
+      Get.delete<ContainerScreensController>(); // important. resets controller so values aren't retained after creating a container and making another
       Get.offAll(ContainersScreen(searchText: ""));
     });
   }

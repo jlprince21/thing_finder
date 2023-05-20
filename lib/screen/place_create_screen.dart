@@ -5,17 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
 import 'package:thing_finder/screen/places_screen.dart';
 
-class PlaceCreateScreenController extends GetxController {
-  var titleEditingController = TextEditingController();
-  var descriptionEditingController = TextEditingController();
-
-  @override
-  void dispose() {
-    titleEditingController.dispose();
-    descriptionEditingController.dispose();
-    super.dispose();
-  }
-}
+import '../common/place_common.dart';
 
 class PlaceCreateScreen extends StatelessWidget {
   late AppDatabase appDatabase;
@@ -25,43 +15,21 @@ class PlaceCreateScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     appDatabase = Provider.of<AppDatabase>(context);
-    final controller = Get.put(PlaceCreateScreenController());
+    final controller = Get.put(PlaceScreensController());
 
     return Scaffold(
       appBar: _getDetailAppBar(controller),
       body: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         child: Column(
-          children: [
-            TextFormField(
-              controller: controller.titleEditingController,
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  hintText: 'Place Title'),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            TextFormField(
-              controller: controller.descriptionEditingController,
-              maxLength: 100,
-              minLines: 4,
-              maxLines: 6,
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  hintText: 'Place Description'),
-            ),
-          ],
+          children:
+            getCommonPlaceWidgets(controller),
         ),
       ),
     );
   }
 
-  _getDetailAppBar(PlaceCreateScreenController controller) {
+  _getDetailAppBar(PlaceScreensController controller) {
     return AppBar(
       elevation: 0,
       leading: IconButton(
@@ -98,7 +66,7 @@ class PlaceCreateScreen extends StatelessWidget {
             description
             )
         .then((value) {
-      Get.delete<PlaceCreateScreenController>(); // important. resets controller so values aren't retained after creating a place and making another
+      Get.delete<PlaceScreensController>(); // important. resets controller so values aren't retained after creating a place and making another
       Get.offAll(PlacesScreen(searchText: ""));
     });
   }
