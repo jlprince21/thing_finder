@@ -1,4 +1,4 @@
-package com.magiccodex.thingfinder
+package com.example.thingfinder
 
 import io.flutter.embedding.android.FlutterActivity
 
