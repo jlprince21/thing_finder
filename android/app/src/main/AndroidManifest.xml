@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.magiccodex.thingfinder">
+    package="com.example.thingfinder">
    <application
         android:label="Thing Finder"
         android:name="${applicationName}"
