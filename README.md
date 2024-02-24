@@ -28,8 +28,13 @@ TODO: 2022-10-19 get obfuscation and split debug info working for Android.
 
 Output will be located at \[project]/build/app/outputs/bundle/release/app.aab
 
+# Pre-commit Steps
+
+Double check that `dart fix --dry-run` followed by `dart fix --apply` are run to
+keep Dart fixes coming in fresh!
+
 # Credits
 
 Inspired by [CodingWithTashi's drift tutorial series](https://www.youtube.com/watch?v=khwi8e3fZbM).
-Early versions of this project draw heavily from this example, thank you for your
-lessons.
+Early versions of this project draw heavily from this example, thank you for
+your lessons.

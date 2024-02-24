@@ -22,7 +22,7 @@ class SearchScreenController extends GetxController {
 }
 
 class SearchScreen extends StatelessWidget {
-  SearchScreen();
+  const SearchScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class SearchScreen extends StatelessWidget {
       init: SearchScreenController(),
       builder: (controller) => Scaffold(
         appBar: _getSearchAppBar(),
-        drawer: AppDrawer(),
+        drawer: const AppDrawer(),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(12.0),

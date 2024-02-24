@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart' as dr;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -10,7 +9,7 @@ import '../common/container_common.dart';
 class ContainerCreateScreen extends StatelessWidget {
   late AppDatabase appDatabase;
 
-  ContainerCreateScreen();
+  ContainerCreateScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +30,7 @@ class ContainerCreateScreen extends StatelessWidget {
                   if (placeList != null) {
                     placeList.insert(
                         0,
-                        DbPlaceData(
+                        const DbPlaceData(
                             uniqueId: "no-place",
                             title: "(No Place)",
                             date: "2022-01-01",
@@ -42,13 +41,13 @@ class ContainerCreateScreen extends StatelessWidget {
                   return Center(
                       child: Text(
                     snapshot.error.toString(),
-                    style: Theme.of(context).textTheme.bodyText2,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ));
                 }
                 return Center(
                   child: Text(
                     'Click on add button to create new item',
-                    style: Theme.of(context).textTheme.bodyText2,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 );
               },

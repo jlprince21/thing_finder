@@ -13,7 +13,7 @@ class ContainerDetailScreen extends StatelessWidget {
   late AppDatabase appDatabase;
   String containerId;
 
-  ContainerDetailScreen({required this.containerId});
+  ContainerDetailScreen({super.key, required this.containerId});
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +52,7 @@ class ContainerDetailScreen extends StatelessWidget {
                                 if (placeList != null) {
                                   placeList.insert(
                                       0,
-                                      DbPlaceData(
+                                      const DbPlaceData(
                                           uniqueId: "no-place",
                                           title: "(No Place)",
                                           date: "2022-01-01",
@@ -63,13 +63,13 @@ class ContainerDetailScreen extends StatelessWidget {
                                 return Center(
                                     child: Text(
                                   snapshot.error.toString(),
-                                  style: Theme.of(context).textTheme.bodyText2,
+                                  style: Theme.of(context).textTheme.bodyMedium,
                                 ));
                               }
                               return Center(
                                 child: Text(
                                   'Click on add button to create new container',
-                                  style: Theme.of(context).textTheme.bodyText2,
+                                  style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               );
                             },
@@ -80,7 +80,7 @@ class ContainerDetailScreen extends StatelessWidget {
                           if (controller.currentPlace != null) ...[
                             Padding(
                               padding: const EdgeInsets.only(bottom: 8.0),
-                              child: Text("Inside place: " + controller.currentPlace!.title),
+                              child: Text("Inside place: ${controller.currentPlace!.title}"),
                             ),
                             ElevatedButton(
                               onPressed: () {

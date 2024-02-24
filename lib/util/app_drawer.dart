@@ -9,10 +9,12 @@ import '../screen/places_screen.dart';
 import '../screen/search_screen.dart';
 
 class AppDrawer extends StatelessWidget {
+  const AppDrawer({super.key});
+
   @override
   Widget build(BuildContext context) {
     List<Widget> drawerWidgets = <Widget>[];
-    drawerWidgets.add(DrawerHeader(
+    drawerWidgets.add(const DrawerHeader(
       decoration: BoxDecoration(
         color: Colors.blue,
       ),
@@ -20,7 +22,7 @@ class AppDrawer extends StatelessWidget {
         radius: 5,
         backgroundColor: Colors.green,
         child: Padding(
-          padding: const EdgeInsets.all(4), // Border radius
+          padding: EdgeInsets.all(4), // Border radius
           child: ClipOval(child: Image(image: AssetImage('assets/icon/icon.png'))),
         ),
       ),
@@ -41,7 +43,7 @@ class AppDrawer extends StatelessWidget {
     List <Widget> menuEntries = <Widget>[];
 
     final ThemeData theme = Theme.of(context);
-    final TextStyle textStyle = theme.textTheme.bodyText2!;
+    final TextStyle textStyle = theme.textTheme.bodyMedium!;
 
     final List<Widget> aboutBoxChildren = <Widget>[
       const SizedBox(height: 24),
@@ -103,7 +105,7 @@ class AppDrawer extends StatelessWidget {
       ListTile(
         title: const Text('Search'),
         onTap: () {
-          Get.to(SearchScreen()); // 2022-10-08 let route stack build
+          Get.to(const SearchScreen()); // 2022-10-08 let route stack build
         },
       ),
     );
@@ -128,7 +130,7 @@ class AppDrawer extends StatelessWidget {
                 radius: 40,
                 backgroundColor: Colors.green,
                 child: Padding(
-                  padding: const EdgeInsets.all(4), // Border radius
+                  padding: EdgeInsets.all(4), // Border radius
                   child: ClipOval(child: Image(image: AssetImage('assets/icon/icon.png'))),
                 ),
               ),

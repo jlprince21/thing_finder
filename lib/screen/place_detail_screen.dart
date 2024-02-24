@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
-import 'package:thing_finder/screen/containers_screen.dart';
-import 'package:thing_finder/screen/items_screen.dart';
 import 'package:thing_finder/screen/places_screen.dart';
 
 import '../common/place_common.dart';
@@ -14,7 +12,7 @@ class PlaceDetailScreen extends StatelessWidget {
   late AppDatabase appDatabase;
   String placeId;
 
-  PlaceDetailScreen({required this.placeId});
+  PlaceDetailScreen({super.key, required this.placeId});
 
   @override
   Widget build(BuildContext context) {
@@ -47,10 +45,10 @@ class PlaceDetailScreen extends StatelessWidget {
                 return Column(children: widgets);
               } else if (snapshot.hasError) {
                 return Center(
-                    child: Text('Error: ' + snapshot.error.toString(), style: Theme.of(context).textTheme.bodyText2,
+                    child: Text('Error: ${snapshot.error}', style: Theme.of(context).textTheme.bodyMedium,
                 ));
               } else {
-                return Center(child: Text('Error', style: Theme.of(context).textTheme.bodyText2));
+                return Center(child: Text('Error', style: Theme.of(context).textTheme.bodyMedium));
               }
             },
           ),

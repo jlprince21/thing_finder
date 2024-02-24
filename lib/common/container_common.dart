@@ -6,7 +6,7 @@ class ContainerScreensController extends GetxController {
   var titleEditingController = TextEditingController();
   var descriptionEditingController = TextEditingController();
   DbPlaceData? currentPlace;
-  String? selectedPlace = null;
+  String? selectedPlace;
 
   @override
   void dispose() {

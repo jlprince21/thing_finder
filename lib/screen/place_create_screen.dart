@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart' as dr;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -10,7 +9,7 @@ import '../common/place_common.dart';
 class PlaceCreateScreen extends StatelessWidget {
   late AppDatabase appDatabase;
 
-  PlaceCreateScreen();
+  PlaceCreateScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

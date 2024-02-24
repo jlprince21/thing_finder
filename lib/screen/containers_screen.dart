@@ -27,7 +27,7 @@ class ContainersScreen extends StatelessWidget {
   final globalKey = GlobalKey<ScaffoldState>();
   String? searchText;
 
-  ContainersScreen({@required this.searchText});
+  ContainersScreen({super.key, @required this.searchText});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class ContainersScreen extends StatelessWidget {
       init: ContainersScreenController(""),
       builder: (controller) => Scaffold(
         appBar: _getContainersAppBar(context),
-        drawer: AppDrawer(),
+        drawer: const AppDrawer(),
         key: globalKey, // TODO still need globalkey?
         body: Center(
           child: FutureBuilder<List<DbContainerData>>(
@@ -46,11 +46,11 @@ class ContainersScreen extends StatelessWidget {
               if (snapshot.hasError) {
                 return Center(
                   child: Text(
-                    'Error: ' + snapshot.error.toString(),
-                    style: Theme.of(context).textTheme.bodyText2,
+                    'Error: ${snapshot.error}',
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 );
-              } else if (snapshot.hasData && snapshot.data!.length > 0) {
+              } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                 controller.setContainers(snapshot.data!);
                 return containerListUI(controller.stuff, controller.axisCount.value);
               } else {
@@ -58,7 +58,7 @@ class ContainersScreen extends StatelessWidget {
                   child: Text(
                     'No containers found; click on add button to create one.',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyText2,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 );
               }
@@ -116,21 +116,21 @@ class ContainersScreen extends StatelessWidget {
                     Expanded(
                       child: Text(
                         dbContainerData.title,
-                        style: Theme.of(context).textTheme.bodyText2,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     )
                   ],
                 ),
                 Text(
                   dbContainerData.description ?? "",
-                  style: Theme.of(context).textTheme.bodyText1,
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
                       dbContainerData.date,
-                      style: Theme.of(context).textTheme.subtitle2,
+                      style: Theme.of(context).textTheme.titleSmall,
                     )
                   ],
                 )
@@ -151,7 +151,7 @@ class ContainersScreen extends StatelessWidget {
   }
 
   _getContainersAppBar(BuildContext context) {
-    final ContainersScreenController _p = Get.put(ContainersScreenController(""));
+    final ContainersScreenController p = Get.put(ContainersScreenController(""));
 
     return AppBar(
       // backgroundColor: Colors.white,
@@ -164,15 +164,15 @@ class ContainersScreen extends StatelessWidget {
       actions: [
         IconButton(
           onPressed: () {
-            if (_p.axisCount.value == 1) {
-              _p.axisCount.value = 2;
+            if (p.axisCount.value == 1) {
+              p.axisCount.value = 2;
             } else {
-              _p.axisCount.value = 1;
+              p.axisCount.value = 1;
             }
-            _p.update();
+            p.update();
           },
           icon: Icon(
-            _p.axisCount.value == 2 ? Icons.grid_on : Icons.list,
+            p.axisCount.value == 2 ? Icons.grid_on : Icons.list,
             // color: Colors.black,
           ),
         )
