@@ -133,8 +133,8 @@ class AppDrawer extends StatelessWidget {
                 ),
               ),
             applicationName: 'Thing Finder',
-            applicationVersion: 'October 2022',
-            applicationLegalese: '\u{a9} 2022 Magic Codex LLC',
+            applicationVersion: 'February 2024',
+            applicationLegalese: '\u{a9} 2022 github.com/jlprince21',
             children: aboutBoxChildren,
           );
         },
