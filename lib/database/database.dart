@@ -155,7 +155,7 @@ class AppDatabase extends _$AppDatabase {
     // TODO 2022-05-17 try Drift join syntax someday...
     var theContainer = await (select(dbContainer)..where((t) => t.uniqueId.equals(containerId))).getSingle();
 
-    DbLocationData? theMap = null;
+    DbLocationData? theMap;
 
     try {
       theMap = await  (select(dbLocation)..where((t) => t.objectId.equals(containerId))).getSingleOrNull();
@@ -185,7 +185,7 @@ class AppDatabase extends _$AppDatabase {
 
   // search for container
   Future<List<DbContainerData>> searchForContainers(String searchText) async {
-    return await (select(dbContainer)..where((tbl) => tbl.title.like("%" + searchText + "%"))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
+    return await (select(dbContainer)..where((tbl) => tbl.title.like("%$searchText%"))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
   }
 
   /* ---------------------------------------------------------------------------
@@ -237,7 +237,7 @@ class AppDatabase extends _$AppDatabase {
 
   // search for items
   Future<List<DbItemData>> searchForItems(String searchText) async {
-    return await (select(dbItem)..where((tbl) => tbl.title.like("%" + searchText + "%"))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
+    return await (select(dbItem)..where((tbl) => tbl.title.like("%$searchText%"))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
   }
 
   // get specific item with enough data needed for the item details screen
@@ -245,7 +245,7 @@ class AppDatabase extends _$AppDatabase {
     // TODO 2022-05-17 try Drift join syntax someday...
     var theItem = await (select(dbItem)..where((t) => t.uniqueId.equals(itemId))).getSingle();
 
-    DbLocationData? theMap = null;
+    DbLocationData? theMap;
 
     try {
       theMap = await  (select(dbLocation)..where((t) => t.objectId.equals(itemId))).getSingleOrNull();
@@ -289,7 +289,7 @@ class AppDatabase extends _$AppDatabase {
     // all of them each time one is deleted.
     var date = DateFormat.yMMMd().format(DateTime.now());
     var uuid = const Uuid();
-    return await into(dbLocation).insert(DbLocationCompanion(date: Value(date), objectId: Value(objectId), insideId: Value(null), uniqueId: Value(uuid.v4())));
+    return await into(dbLocation).insert(DbLocationCompanion(date: Value(date), objectId: Value(objectId), insideId: const Value(null), uniqueId: Value(uuid.v4())));
   }
 
   /* ---------------------------------------------------------------------------
@@ -333,7 +333,7 @@ class AppDatabase extends _$AppDatabase {
 
   // search for place
   Future<List<DbPlaceData>> searchForPlaces(String searchText) async {
-    return await (select(dbPlace)..where((tbl) => tbl.title.like("%" + searchText + "%"))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
+    return await (select(dbPlace)..where((tbl) => tbl.title.like("%$searchText%"))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
   }
 
   // update place
@@ -357,12 +357,12 @@ class AppDatabase extends _$AppDatabase {
   // get all items in a particular container
   Future<List<DbItemData>> getContainerContents(String containerId) async {
     // TODO 2022-05-18 a join would be really nice here too
-    var maps = await (select(dbLocation)..where((tbl) => tbl.insideId.like("%" + containerId + "%"))).get();
+    var maps = await (select(dbLocation)..where((tbl) => tbl.insideId.like("%$containerId%"))).get();
     List<String> ids = [];
 
-    maps.forEach((element) {
+    for (var element in maps) {
       ids.add(element.objectId ?? "");
-    });
+    }
 
     return await (select(dbItem)..where((tbl) => tbl.uniqueId.isIn(ids))).get();
   }
@@ -397,25 +397,25 @@ class AppDatabase extends _$AppDatabase {
   // get all containers and items in a particular place
   Future<List<GenericItemContainerOrPlace>> getPlaceContents(String placeId) async {
     // TODO 2022-05-18 a join would be really nice here too
-    var maps = await (select(dbLocation)..where((tbl) => tbl.insideId.like("%" + placeId + "%"))).get();
+    var maps = await (select(dbLocation)..where((tbl) => tbl.insideId.like("%$placeId%"))).get();
     List<String> ids = [];
 
-    maps.forEach((element) {
+    for (var element in maps) {
       ids.add(element.objectId ?? "");
-    });
+    }
 
     var items = await (select(dbItem)..where((tbl) => tbl.uniqueId.isIn(ids))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
     var containers = await (select(dbContainer)..where((tbl) => tbl.uniqueId.isIn(ids))..orderBy([(t) => OrderingTerm(expression: t.title.collate(Collate.noCase))])).get();
 
     List<GenericItemContainerOrPlace> theList = [];
 
-    items.forEach((element) {
+    for (var element in items) {
       theList.add(GenericItemContainerOrPlace(element.uniqueId, element.title, element.description, element.date, Differentiator.item));
-    });
+    }
 
-    containers.forEach((element) {
+    for (var element in containers) {
       theList.add(GenericItemContainerOrPlace(element.uniqueId, element.title, element.description, element.date, Differentiator.container));
-    });
+    }
 
     return theList;
   }

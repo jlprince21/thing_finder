@@ -3,7 +3,6 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:thing_finder/database/database.dart';
-import 'package:thing_finder/screen/item_create_screen.dart';
 import 'package:thing_finder/screen/item_detail_screen.dart';
 import 'package:thing_finder/util/app_drawer.dart';
 
@@ -30,7 +29,7 @@ class ItemsAndContainersScreen extends StatelessWidget {
   String? searchText;
   String? placeId;
 
-  ItemsAndContainersScreen({@required this.searchText, @required this.placeId});
+  ItemsAndContainersScreen({super.key, @required this.searchText, @required this.placeId});
 
   @override
   Widget build(BuildContext context) {
@@ -40,37 +39,36 @@ class ItemsAndContainersScreen extends StatelessWidget {
       init: ItemsAndContainersScreenController(""),
       builder: (controller) => Scaffold(
         appBar: _getItemsAndContainersAppBar(),
-        drawer: AppDrawer(),
+        drawer: const AppDrawer(),
         body: FutureBuilder<List<GenericItemContainerOrPlace>>(
           future: _getItemsAndContainersFromDatabase(searchText, placeId),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               controller.setItems(snapshot.data!);
               List<GenericItemContainerOrPlace>? itemList = controller.stuff;
-              if (itemList != null) { // TODO 2022-04-28 this null check *may* be able to be removed along with others like it
-                if (itemList.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No items or containers found.',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyText2,
-                    ),
-                  );
-                } else {
-                  return itemOrContainerListUI(controller.stuff, controller.axisCount.value);
-                }
+              // TODO 2022-04-28 this null check *may* be able to be removed along with others like it
+              if (itemList.isEmpty) {
+                return Center(
+                  child: Text(
+                    'No items or containers found.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                );
+              } else {
+                return itemOrContainerListUI(controller.stuff, controller.axisCount.value);
               }
             } else if (snapshot.hasError) {
               return Center(
                   child: Text(
                 snapshot.error.toString(),
-                style: Theme.of(context).textTheme.bodyText2,
+                style: Theme.of(context).textTheme.bodyMedium,
               ));
             }
             return Center(
               child: Text(
                 'No items or containers found.',
-                style: Theme.of(context).textTheme.bodyText2,
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             );
           },
@@ -120,21 +118,21 @@ class ItemsAndContainersScreen extends StatelessWidget {
                     Expanded(
                       child: Text(
                         itemOrContainerData.title,
-                        style: Theme.of(context).textTheme.bodyText2,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     )
                   ],
                 ),
                 Text(
                   itemOrContainerData.description ?? "",
-                  style: Theme.of(context).textTheme.bodyText1,
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
                       itemOrContainerData.date,
-                      style: Theme.of(context).textTheme.subtitle2,
+                      style: Theme.of(context).textTheme.titleSmall,
                     )
                   ],
                 )
@@ -158,7 +156,7 @@ class ItemsAndContainersScreen extends StatelessWidget {
   }
 
   _getItemsAndContainersAppBar() {
-    final ItemsAndContainersScreenController _p = Get.put(ItemsAndContainersScreenController(""));
+    final ItemsAndContainersScreenController p = Get.put(ItemsAndContainersScreenController(""));
 
     return AppBar(
       // backgroundColor: Colors.white,
@@ -171,15 +169,15 @@ class ItemsAndContainersScreen extends StatelessWidget {
       actions: [
         IconButton(
           onPressed: () {
-            if (_p.axisCount.value == 1) {
-              _p.axisCount.value = 2;
+            if (p.axisCount.value == 1) {
+              p.axisCount.value = 2;
             } else {
-              _p.axisCount.value = 1;
+              p.axisCount.value = 1;
             }
-            _p.update();
+            p.update();
           },
           icon: Icon(
-            _p.axisCount.value == 2 ? Icons.grid_on : Icons.list,
+            p.axisCount.value == 2 ? Icons.grid_on : Icons.list,
             // color: Colors.black,
           ),
         )

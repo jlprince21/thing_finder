@@ -13,7 +13,7 @@ import 'package:thing_finder/util/app_drawer.dart';
 class DatabaseToolsScreen extends StatelessWidget {
   late AppDatabase appDatabase;
 
-  DatabaseToolsScreen();
+  DatabaseToolsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class DatabaseToolsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: _getAppBar(),
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
       body: ListView(
         children: [
           ListTile(
@@ -214,7 +214,7 @@ class DatabaseToolsScreen extends StatelessWidget {
     appDatabase.importItem(DbItemCompanion(
       uniqueId: dr.Value(uniqueId),
       title: dr.Value(title),
-      description: description == null ? dr.Value(null) : dr.Value(description),
+      description: description == null ? const dr.Value(null) : dr.Value(description),
       date: dr.Value(date),
     ));
   }
@@ -225,7 +225,7 @@ class DatabaseToolsScreen extends StatelessWidget {
       .importContainer(DbContainerCompanion(
         uniqueId: dr.Value(containerId),
         title: dr.Value(containerTitle),
-        description: containerDescription == null ? dr.Value(null) : dr.Value(containerDescription),
+        description: containerDescription == null ? const dr.Value(null) : dr.Value(containerDescription),
         date: dr.Value(date),
         ));
   }
@@ -234,7 +234,7 @@ class DatabaseToolsScreen extends StatelessWidget {
   {
     appDatabase
       .importIndex(DbIndexCompanion(
-        uniqueId: dr.Value(indexId!),
+        uniqueId: dr.Value(indexId),
         type: dr.Value(type),
         ));
   }
@@ -245,7 +245,7 @@ class DatabaseToolsScreen extends StatelessWidget {
       .importPlace(DbPlaceCompanion(
         uniqueId: dr.Value(uniqueId),
         title: dr.Value(title),
-        description: description == null ? dr.Value(null) : dr.Value(description),
+        description: description == null ? const dr.Value(null) : dr.Value(description),
         date: dr.Value(date),
       ));
   }
@@ -284,7 +284,7 @@ class DatabaseToolsScreen extends StatelessWidget {
       .importContainer(DbContainerCompanion(
         uniqueId: dr.Value(containerId!),
         title: dr.Value(containerTitle!),
-        description: containerDescription == null ? dr.Value(null) : dr.Value(containerDescription),
+        description: containerDescription == null ? const dr.Value(null) : dr.Value(containerDescription),
         date: dr.Value(containerDate!),
         ));
   }
@@ -325,7 +325,7 @@ class DatabaseToolsScreen extends StatelessWidget {
     appDatabase.importItem(DbItemCompanion(
       uniqueId: dr.Value(itemId!),
       title: dr.Value(itemTitle!),
-      description: itemDescription == null ? dr.Value(null) : dr.Value(itemDescription),
+      description: itemDescription == null ? const dr.Value(null) : dr.Value(itemDescription),
       date: dr.Value(itemDate!),
     ));
   }
@@ -348,7 +348,7 @@ class DatabaseToolsScreen extends StatelessWidget {
       .importLocation(DbLocationCompanion(
         uniqueId: dr.Value(uniqueId!),
         objectId: dr.Value(objectId!),
-        insideId: insideId == null ? dr.Value(null) : dr.Value(insideId),
+        insideId: insideId == null ? const dr.Value(null) : dr.Value(insideId),
         date: dr.Value(date!),
         ));
   }
@@ -358,38 +358,38 @@ class DatabaseToolsScreen extends StatelessWidget {
 
     if (result != null) {
       File file = File(result.files.single.path!);
-      print("path: " + file.path);
+      print("path: ${file.path}");
 
       if (importType == "item")
       {
-        new File(file.path)
+        File(file.path)
           .openRead()
           .transform(utf8.decoder)
-          .transform(new LineSplitter())
+          .transform(const LineSplitter())
           .forEach((l) => _createItem(l));
       }
       else if (importType == "container")
       {
-        new File(file.path)
+        File(file.path)
           .openRead()
           .transform(utf8.decoder)
-          .transform(new LineSplitter())
+          .transform(const LineSplitter())
           .forEach((l) => _createContainer(l));
       }
       else if (importType == "location")
       {
-        new File(file.path)
+        File(file.path)
           .openRead()
           .transform(utf8.decoder)
-          .transform(new LineSplitter())
+          .transform(const LineSplitter())
           .forEach((l) => _createLocation(l));
       }
       else if (importType == "index")
       {
-        new File(file.path)
+        File(file.path)
           .openRead()
           .transform(utf8.decoder)
-          .transform(new LineSplitter())
+          .transform(const LineSplitter())
           .forEach((l) => _createIndex(l));
       }
 

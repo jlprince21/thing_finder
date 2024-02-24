@@ -6,7 +6,7 @@ import 'package:thing_finder/util/app_drawer.dart';
 class MainMenuScreen extends StatelessWidget {
   late AppDatabase appDatabase;
 
-  MainMenuScreen();
+  MainMenuScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class MainMenuScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: _getMainMenuAppBar(),
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
       body: ListView(
           // Important: Remove any padding from the ListView.
           // padding: EdgeInsets.zero,

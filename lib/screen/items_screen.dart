@@ -28,7 +28,7 @@ class ItemsScreen extends StatelessWidget {
   String? searchText;
   String? containerId;
 
-  ItemsScreen({@required this.searchText, @required this.containerId});
+  ItemsScreen({super.key, @required this.searchText, @required this.containerId});
 
   @override
   Widget build(BuildContext context) {
@@ -38,37 +38,36 @@ class ItemsScreen extends StatelessWidget {
       init: ItemsScreenController(""),
       builder: (controller) => Scaffold(
         appBar: _getItemsAppBar(),
-        drawer: AppDrawer(),
+        drawer: const AppDrawer(),
         body: FutureBuilder<List<DbItemData>>(
           future: _getItemsFromDatabase(searchText, containerId),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               controller.setItems(snapshot.data!);
               List<DbItemData>? itemList = controller.stuff;
-              if (itemList != null) { // TODO 2022-04-28 this null check *may* be able to be removed along with others like it
-                if (itemList.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No items found; click on add button to create one.',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyText2,
-                    ),
-                  );
-                } else {
-                  return itemListUI(controller.stuff, controller.axisCount.value);
-                }
+              // TODO 2022-04-28 this null check *may* be able to be removed along with others like it
+              if (itemList.isEmpty) {
+                return Center(
+                  child: Text(
+                    'No items found; click on add button to create one.',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                );
+              } else {
+                return itemListUI(controller.stuff, controller.axisCount.value);
               }
             } else if (snapshot.hasError) {
               return Center(
                   child: Text(
                 snapshot.error.toString(),
-                style: Theme.of(context).textTheme.bodyText2,
+                style: Theme.of(context).textTheme.bodyMedium,
               ));
             }
             return Center(
               child: Text(
                 'Click on add button to create new item',
-                style: Theme.of(context).textTheme.bodyText2,
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             );
           },
@@ -126,21 +125,21 @@ class ItemsScreen extends StatelessWidget {
                     Expanded(
                       child: Text(
                         dbItemData.title,
-                        style: Theme.of(context).textTheme.bodyText2,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     )
                   ],
                 ),
                 Text(
                   dbItemData.description ?? "",
-                  style: Theme.of(context).textTheme.bodyText1,
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
                       dbItemData.date,
-                      style: Theme.of(context).textTheme.subtitle2,
+                      style: Theme.of(context).textTheme.titleSmall,
                     )
                   ],
                 )
@@ -161,7 +160,7 @@ class ItemsScreen extends StatelessWidget {
   }
 
   _getItemsAppBar() {
-    final ItemsScreenController _p = Get.put(ItemsScreenController(""));
+    final ItemsScreenController p = Get.put(ItemsScreenController(""));
 
     return AppBar(
       // backgroundColor: Colors.white,
@@ -174,15 +173,15 @@ class ItemsScreen extends StatelessWidget {
       actions: [
         IconButton(
           onPressed: () {
-            if (_p.axisCount.value == 1) {
-              _p.axisCount.value = 2;
+            if (p.axisCount.value == 1) {
+              p.axisCount.value = 2;
             } else {
-              _p.axisCount.value = 1;
+              p.axisCount.value = 1;
             }
-            _p.update();
+            p.update();
           },
           icon: Icon(
-            _p.axisCount.value == 2 ? Icons.grid_on : Icons.list,
+            p.axisCount.value == 2 ? Icons.grid_on : Icons.list,
             // color: Colors.black,
           ),
         )

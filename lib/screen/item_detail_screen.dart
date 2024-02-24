@@ -11,7 +11,7 @@ class ItemDetailScreenController extends GetxController {
   var titleEditingController = TextEditingController();
   var descriptionEditingController = TextEditingController();
   GenericItemContainerOrPlace? currentContainerOrPlace;
-  String? selectedContainerOrPlace = null;
+  String? selectedContainerOrPlace;
 
   @override
   void dispose() {
@@ -25,7 +25,7 @@ class ItemDetailScreen extends StatelessWidget {
   late AppDatabase appDatabase;
   String itemId;
 
-  ItemDetailScreen({required this.itemId});
+  ItemDetailScreen({super.key, required this.itemId});
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +65,7 @@ class ItemDetailScreen extends StatelessWidget {
                                 if (containerList != null || placeList != null) {
                                   containerList.insert(
                                       0,
-                                      DbContainerData(
+                                      const DbContainerData(
                                           uniqueId: "no-container",
                                           title: "(No Container or Place)",
                                           date: "2022-01-01",
@@ -76,13 +76,13 @@ class ItemDetailScreen extends StatelessWidget {
                                 return Center(
                                     child: Text(
                                   snapshot.error.toString(),
-                                  style: Theme.of(context).textTheme.bodyText2,
+                                  style: Theme.of(context).textTheme.bodyMedium,
                                 ));
                               }
                               return Center(
                                 child: Text(
                                   'Click on add button to create new item',
-                                  style: Theme.of(context).textTheme.bodyText2,
+                                  style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               );
                             },
@@ -151,7 +151,7 @@ class ItemDetailScreen extends StatelessWidget {
 
     var index = 0; // 2022-10-13 This feels like it isn't really needed, but it is. Would be nice if this could be gone one day.
 
-    if (controller.currentContainerOrPlace != null && controller.currentContainerOrPlace!.uniqueId != null)
+    if (controller.currentContainerOrPlace != null)
     {
       index = theList.indexWhere((element) => element.uniqueId == controller.currentContainerOrPlace!.uniqueId);
     }

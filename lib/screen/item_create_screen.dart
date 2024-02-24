@@ -20,6 +20,8 @@ class ItemCreateScreenController extends GetxController {
 class ItemCreateScreen extends StatelessWidget {
   late AppDatabase appDatabase;
 
+  ItemCreateScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     appDatabase = Provider.of<AppDatabase>(context);
@@ -40,7 +42,7 @@ class ItemCreateScreen extends StatelessWidget {
                   if (containerList != null || placeList != null) {
                     containerList.insert(
                         0,
-                        DbContainerData(
+                        const DbContainerData(
                             uniqueId: "no-container",
                             title: "(No Container or Place)",
                             date: "2022-01-01",
@@ -51,13 +53,13 @@ class ItemCreateScreen extends StatelessWidget {
                   return Center(
                       child: Text(
                     snapshot.error.toString(),
-                    style: Theme.of(context).textTheme.bodyText2,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ));
                 }
                 return Center(
                   child: Text(
                     'Click on add button to create new item',
-                    style: Theme.of(context).textTheme.bodyText2,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 );
               },
@@ -129,7 +131,7 @@ class ItemCreateScreen extends StatelessWidget {
               ),
               Text(
                 container.title,
-                style: TextStyle(color: Colors.black),
+                style: const TextStyle(color: Colors.black),
               ),
             ],
           ),
