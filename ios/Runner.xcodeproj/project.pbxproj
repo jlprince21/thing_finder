@@ -156,7 +156,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 1430;
-				ORGANIZATIONNAME = "Magic Codex LLC";
+				ORGANIZATIONNAME = "jlprince21";
 				TargetAttributes = {
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
