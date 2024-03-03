@@ -404,6 +404,6 @@ class DatabaseToolsScreen extends StatelessWidget {
     var appDocumentsDirectory = await getApplicationDocumentsDirectory();
     var appDocumentsPath = appDocumentsDirectory.path;
     var filePath = '$appDocumentsPath/db.sqlite'; // TODO this path probably needs to be a constant somewhere
-    Share.shareFiles([filePath]);
+    Share.shareXFiles([XFile(filePath)]);
   }
 }
