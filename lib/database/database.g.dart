@@ -2,11 +2,69 @@
 
 part of 'database.dart';
 
-// **************************************************************************
-// DriftDatabaseGenerator
-// **************************************************************************
-
 // ignore_for_file: type=lint
+class $DbIndexTable extends DbIndex with TableInfo<$DbIndexTable, DbIndexData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DbIndexTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _uniqueIdMeta =
+      const VerificationMeta('uniqueId');
+  @override
+  late final GeneratedColumn<String> uniqueId = GeneratedColumn<String>(
+      'unique_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<int> type = GeneratedColumn<int>(
+      'type', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [uniqueId, type];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'db_index';
+  @override
+  VerificationContext validateIntegrity(Insertable<DbIndexData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('unique_id')) {
+      context.handle(_uniqueIdMeta,
+          uniqueId.isAcceptableOrUnknown(data['unique_id']!, _uniqueIdMeta));
+    } else if (isInserting) {
+      context.missing(_uniqueIdMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {uniqueId};
+  @override
+  DbIndexData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DbIndexData(
+      uniqueId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}unique_id'])!,
+      type: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}type'])!,
+    );
+  }
+
+  @override
+  $DbIndexTable createAlias(String alias) {
+    return $DbIndexTable(attachedDatabase, alias);
+  }
+}
+
 class DbIndexData extends DataClass implements Insertable<DbIndexData> {
   final String uniqueId;
   final int type;
@@ -69,29 +127,36 @@ class DbIndexData extends DataClass implements Insertable<DbIndexData> {
 class DbIndexCompanion extends UpdateCompanion<DbIndexData> {
   final Value<String> uniqueId;
   final Value<int> type;
+  final Value<int> rowid;
   const DbIndexCompanion({
     this.uniqueId = const Value.absent(),
     this.type = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   DbIndexCompanion.insert({
     required String uniqueId,
     required int type,
+    this.rowid = const Value.absent(),
   })  : uniqueId = Value(uniqueId),
         type = Value(type);
   static Insertable<DbIndexData> custom({
     Expression<String>? uniqueId,
     Expression<int>? type,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (uniqueId != null) 'unique_id': uniqueId,
       if (type != null) 'type': type,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
-  DbIndexCompanion copyWith({Value<String>? uniqueId, Value<int>? type}) {
+  DbIndexCompanion copyWith(
+      {Value<String>? uniqueId, Value<int>? type, Value<int>? rowid}) {
     return DbIndexCompanion(
       uniqueId: uniqueId ?? this.uniqueId,
       type: type ?? this.type,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -104,6 +169,9 @@ class DbIndexCompanion extends UpdateCompanion<DbIndexData> {
     if (type.present) {
       map['type'] = Variable<int>(type.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -111,35 +179,53 @@ class DbIndexCompanion extends UpdateCompanion<DbIndexData> {
   String toString() {
     return (StringBuffer('DbIndexCompanion(')
           ..write('uniqueId: $uniqueId, ')
-          ..write('type: $type')
+          ..write('type: $type, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
 }
 
-class $DbIndexTable extends DbIndex with TableInfo<$DbIndexTable, DbIndexData> {
+class $DbContainerTable extends DbContainer
+    with TableInfo<$DbContainerTable, DbContainerData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $DbIndexTable(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _uniqueIdMeta = const VerificationMeta('uniqueId');
+  $DbContainerTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _uniqueIdMeta =
+      const VerificationMeta('uniqueId');
   @override
   late final GeneratedColumn<String> uniqueId = GeneratedColumn<String>(
       'unique_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES db_index (unique_id)'));
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _typeMeta = const VerificationMeta('type');
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
   @override
-  late final GeneratedColumn<int> type = GeneratedColumn<int>(
-      'type', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
-  List<GeneratedColumn> get $columns => [uniqueId, type];
+  late final GeneratedColumn<String> date = GeneratedColumn<String>(
+      'date', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  String get aliasedName => _alias ?? 'db_index';
+  List<GeneratedColumn> get $columns => [uniqueId, title, description, date];
   @override
-  String get actualTableName => 'db_index';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  VerificationContext validateIntegrity(Insertable<DbIndexData> instance,
+  String get actualTableName => $name;
+  static const String $name = 'db_container';
+  @override
+  VerificationContext validateIntegrity(Insertable<DbContainerData> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -149,11 +235,23 @@ class $DbIndexTable extends DbIndex with TableInfo<$DbIndexTable, DbIndexData> {
     } else if (isInserting) {
       context.missing(_uniqueIdMeta);
     }
-    if (data.containsKey('type')) {
+    if (data.containsKey('title')) {
       context.handle(
-          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
     } else if (isInserting) {
-      context.missing(_typeMeta);
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+          _dateMeta, date.isAcceptableOrUnknown(data['date']!, _dateMeta));
+    } else if (isInserting) {
+      context.missing(_dateMeta);
     }
     return context;
   }
@@ -161,19 +259,23 @@ class $DbIndexTable extends DbIndex with TableInfo<$DbIndexTable, DbIndexData> {
   @override
   Set<GeneratedColumn> get $primaryKey => {uniqueId};
   @override
-  DbIndexData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  DbContainerData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return DbIndexData(
-      uniqueId: attachedDatabase.options.types
+    return DbContainerData(
+      uniqueId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}unique_id'])!,
-      type: attachedDatabase.options.types
-          .read(DriftSqlType.int, data['${effectivePrefix}type'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description']),
+      date: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}date'])!,
     );
   }
 
   @override
-  $DbIndexTable createAlias(String alias) {
-    return $DbIndexTable(attachedDatabase, alias);
+  $DbContainerTable createAlias(String alias) {
+    return $DbContainerTable(attachedDatabase, alias);
   }
 }
 
@@ -270,17 +372,20 @@ class DbContainerCompanion extends UpdateCompanion<DbContainerData> {
   final Value<String> title;
   final Value<String?> description;
   final Value<String> date;
+  final Value<int> rowid;
   const DbContainerCompanion({
     this.uniqueId = const Value.absent(),
     this.title = const Value.absent(),
     this.description = const Value.absent(),
     this.date = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   DbContainerCompanion.insert({
     required String uniqueId,
     required String title,
     this.description = const Value.absent(),
     required String date,
+    this.rowid = const Value.absent(),
   })  : uniqueId = Value(uniqueId),
         title = Value(title),
         date = Value(date);
@@ -289,12 +394,14 @@ class DbContainerCompanion extends UpdateCompanion<DbContainerData> {
     Expression<String>? title,
     Expression<String>? description,
     Expression<String>? date,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (uniqueId != null) 'unique_id': uniqueId,
       if (title != null) 'title': title,
       if (description != null) 'description': description,
       if (date != null) 'date': date,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -302,12 +409,14 @@ class DbContainerCompanion extends UpdateCompanion<DbContainerData> {
       {Value<String>? uniqueId,
       Value<String>? title,
       Value<String?>? description,
-      Value<String>? date}) {
+      Value<String>? date,
+      Value<int>? rowid}) {
     return DbContainerCompanion(
       uniqueId: uniqueId ?? this.uniqueId,
       title: title ?? this.title,
       description: description ?? this.description,
       date: date ?? this.date,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -326,6 +435,9 @@ class DbContainerCompanion extends UpdateCompanion<DbContainerData> {
     if (date.present) {
       map['date'] = Variable<String>(date.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -335,37 +447,39 @@ class DbContainerCompanion extends UpdateCompanion<DbContainerData> {
           ..write('uniqueId: $uniqueId, ')
           ..write('title: $title, ')
           ..write('description: $description, ')
-          ..write('date: $date')
+          ..write('date: $date, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
 }
 
-class $DbContainerTable extends DbContainer
-    with TableInfo<$DbContainerTable, DbContainerData> {
+class $DbItemTable extends DbItem with TableInfo<$DbItemTable, DbItemData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $DbContainerTable(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _uniqueIdMeta = const VerificationMeta('uniqueId');
+  $DbItemTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _uniqueIdMeta =
+      const VerificationMeta('uniqueId');
   @override
   late final GeneratedColumn<String> uniqueId = GeneratedColumn<String>(
       'unique_id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
-      defaultConstraints: 'REFERENCES db_index (unique_id)');
-  final VerificationMeta _titleMeta = const VerificationMeta('title');
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES db_index (unique_id)'));
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
       'title', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _descriptionMeta =
+  static const VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
   @override
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
       'description', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  final VerificationMeta _dateMeta = const VerificationMeta('date');
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
   late final GeneratedColumn<String> date = GeneratedColumn<String>(
       'date', aliasedName, false,
@@ -373,11 +487,12 @@ class $DbContainerTable extends DbContainer
   @override
   List<GeneratedColumn> get $columns => [uniqueId, title, description, date];
   @override
-  String get aliasedName => _alias ?? 'db_container';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'db_container';
+  String get actualTableName => $name;
+  static const String $name = 'db_item';
   @override
-  VerificationContext validateIntegrity(Insertable<DbContainerData> instance,
+  VerificationContext validateIntegrity(Insertable<DbItemData> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -411,23 +526,23 @@ class $DbContainerTable extends DbContainer
   @override
   Set<GeneratedColumn> get $primaryKey => {uniqueId};
   @override
-  DbContainerData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  DbItemData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return DbContainerData(
-      uniqueId: attachedDatabase.options.types
+    return DbItemData(
+      uniqueId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}unique_id'])!,
-      title: attachedDatabase.options.types
+      title: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
-      description: attachedDatabase.options.types
+      description: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}description']),
-      date: attachedDatabase.options.types
+      date: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}date'])!,
     );
   }
 
   @override
-  $DbContainerTable createAlias(String alias) {
-    return $DbContainerTable(attachedDatabase, alias);
+  $DbItemTable createAlias(String alias) {
+    return $DbItemTable(attachedDatabase, alias);
   }
 }
 
@@ -524,17 +639,20 @@ class DbItemCompanion extends UpdateCompanion<DbItemData> {
   final Value<String> title;
   final Value<String?> description;
   final Value<String> date;
+  final Value<int> rowid;
   const DbItemCompanion({
     this.uniqueId = const Value.absent(),
     this.title = const Value.absent(),
     this.description = const Value.absent(),
     this.date = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   DbItemCompanion.insert({
     required String uniqueId,
     required String title,
     this.description = const Value.absent(),
     required String date,
+    this.rowid = const Value.absent(),
   })  : uniqueId = Value(uniqueId),
         title = Value(title),
         date = Value(date);
@@ -543,12 +661,14 @@ class DbItemCompanion extends UpdateCompanion<DbItemData> {
     Expression<String>? title,
     Expression<String>? description,
     Expression<String>? date,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (uniqueId != null) 'unique_id': uniqueId,
       if (title != null) 'title': title,
       if (description != null) 'description': description,
       if (date != null) 'date': date,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -556,12 +676,14 @@ class DbItemCompanion extends UpdateCompanion<DbItemData> {
       {Value<String>? uniqueId,
       Value<String>? title,
       Value<String?>? description,
-      Value<String>? date}) {
+      Value<String>? date,
+      Value<int>? rowid}) {
     return DbItemCompanion(
       uniqueId: uniqueId ?? this.uniqueId,
       title: title ?? this.title,
       description: description ?? this.description,
       date: date ?? this.date,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -580,6 +702,9 @@ class DbItemCompanion extends UpdateCompanion<DbItemData> {
     if (date.present) {
       map['date'] = Variable<String>(date.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -589,48 +714,57 @@ class DbItemCompanion extends UpdateCompanion<DbItemData> {
           ..write('uniqueId: $uniqueId, ')
           ..write('title: $title, ')
           ..write('description: $description, ')
-          ..write('date: $date')
+          ..write('date: $date, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
 }
 
-class $DbItemTable extends DbItem with TableInfo<$DbItemTable, DbItemData> {
+class $DbLocationTable extends DbLocation
+    with TableInfo<$DbLocationTable, DbLocationData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $DbItemTable(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _uniqueIdMeta = const VerificationMeta('uniqueId');
+  $DbLocationTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _uniqueIdMeta =
+      const VerificationMeta('uniqueId');
   @override
   late final GeneratedColumn<String> uniqueId = GeneratedColumn<String>(
       'unique_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      defaultConstraints: 'REFERENCES db_index (unique_id)');
-  final VerificationMeta _titleMeta = const VerificationMeta('title');
-  @override
-  late final GeneratedColumn<String> title = GeneratedColumn<String>(
-      'title', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
+  static const VerificationMeta _objectIdMeta =
+      const VerificationMeta('objectId');
   @override
-  late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  final VerificationMeta _dateMeta = const VerificationMeta('date');
+  late final GeneratedColumn<String> objectId = GeneratedColumn<String>(
+      'object_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES db_index (unique_id)'));
+  static const VerificationMeta _insideIdMeta =
+      const VerificationMeta('insideId');
+  @override
+  late final GeneratedColumn<String> insideId = GeneratedColumn<String>(
+      'inside_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES db_index (unique_id)'));
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
   late final GeneratedColumn<String> date = GeneratedColumn<String>(
       'date', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [uniqueId, title, description, date];
+  List<GeneratedColumn> get $columns => [uniqueId, objectId, insideId, date];
   @override
-  String get aliasedName => _alias ?? 'db_item';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'db_item';
+  String get actualTableName => $name;
+  static const String $name = 'db_location';
   @override
-  VerificationContext validateIntegrity(Insertable<DbItemData> instance,
+  VerificationContext validateIntegrity(Insertable<DbLocationData> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -640,17 +774,13 @@ class $DbItemTable extends DbItem with TableInfo<$DbItemTable, DbItemData> {
     } else if (isInserting) {
       context.missing(_uniqueIdMeta);
     }
-    if (data.containsKey('title')) {
-      context.handle(
-          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
-    } else if (isInserting) {
-      context.missing(_titleMeta);
+    if (data.containsKey('object_id')) {
+      context.handle(_objectIdMeta,
+          objectId.isAcceptableOrUnknown(data['object_id']!, _objectIdMeta));
     }
-    if (data.containsKey('description')) {
-      context.handle(
-          _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
+    if (data.containsKey('inside_id')) {
+      context.handle(_insideIdMeta,
+          insideId.isAcceptableOrUnknown(data['inside_id']!, _insideIdMeta));
     }
     if (data.containsKey('date')) {
       context.handle(
@@ -664,23 +794,23 @@ class $DbItemTable extends DbItem with TableInfo<$DbItemTable, DbItemData> {
   @override
   Set<GeneratedColumn> get $primaryKey => {uniqueId};
   @override
-  DbItemData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  DbLocationData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return DbItemData(
-      uniqueId: attachedDatabase.options.types
+    return DbLocationData(
+      uniqueId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}unique_id'])!,
-      title: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
-      description: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}description']),
-      date: attachedDatabase.options.types
+      objectId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}object_id']),
+      insideId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}inside_id']),
+      date: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}date'])!,
     );
   }
 
   @override
-  $DbItemTable createAlias(String alias) {
-    return $DbItemTable(attachedDatabase, alias);
+  $DbLocationTable createAlias(String alias) {
+    return $DbLocationTable(attachedDatabase, alias);
   }
 }
 
@@ -781,17 +911,20 @@ class DbLocationCompanion extends UpdateCompanion<DbLocationData> {
   final Value<String?> objectId;
   final Value<String?> insideId;
   final Value<String> date;
+  final Value<int> rowid;
   const DbLocationCompanion({
     this.uniqueId = const Value.absent(),
     this.objectId = const Value.absent(),
     this.insideId = const Value.absent(),
     this.date = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   DbLocationCompanion.insert({
     required String uniqueId,
     this.objectId = const Value.absent(),
     this.insideId = const Value.absent(),
     required String date,
+    this.rowid = const Value.absent(),
   })  : uniqueId = Value(uniqueId),
         date = Value(date);
   static Insertable<DbLocationData> custom({
@@ -799,12 +932,14 @@ class DbLocationCompanion extends UpdateCompanion<DbLocationData> {
     Expression<String>? objectId,
     Expression<String>? insideId,
     Expression<String>? date,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (uniqueId != null) 'unique_id': uniqueId,
       if (objectId != null) 'object_id': objectId,
       if (insideId != null) 'inside_id': insideId,
       if (date != null) 'date': date,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -812,12 +947,14 @@ class DbLocationCompanion extends UpdateCompanion<DbLocationData> {
       {Value<String>? uniqueId,
       Value<String?>? objectId,
       Value<String?>? insideId,
-      Value<String>? date}) {
+      Value<String>? date,
+      Value<int>? rowid}) {
     return DbLocationCompanion(
       uniqueId: uniqueId ?? this.uniqueId,
       objectId: objectId ?? this.objectId,
       insideId: insideId ?? this.insideId,
       date: date ?? this.date,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -836,6 +973,9 @@ class DbLocationCompanion extends UpdateCompanion<DbLocationData> {
     if (date.present) {
       map['date'] = Variable<String>(date.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -845,50 +985,52 @@ class DbLocationCompanion extends UpdateCompanion<DbLocationData> {
           ..write('uniqueId: $uniqueId, ')
           ..write('objectId: $objectId, ')
           ..write('insideId: $insideId, ')
-          ..write('date: $date')
+          ..write('date: $date, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
 }
 
-class $DbLocationTable extends DbLocation
-    with TableInfo<$DbLocationTable, DbLocationData> {
+class $DbPlaceTable extends DbPlace with TableInfo<$DbPlaceTable, DbPlaceData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $DbLocationTable(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _uniqueIdMeta = const VerificationMeta('uniqueId');
+  $DbPlaceTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _uniqueIdMeta =
+      const VerificationMeta('uniqueId');
   @override
   late final GeneratedColumn<String> uniqueId = GeneratedColumn<String>(
       'unique_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES db_index (unique_id)'));
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _objectIdMeta = const VerificationMeta('objectId');
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
   @override
-  late final GeneratedColumn<String> objectId = GeneratedColumn<String>(
-      'object_id', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultConstraints: 'REFERENCES db_index (unique_id)');
-  final VerificationMeta _insideIdMeta = const VerificationMeta('insideId');
-  @override
-  late final GeneratedColumn<String> insideId = GeneratedColumn<String>(
-      'inside_id', aliasedName, true,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultConstraints: 'REFERENCES db_index (unique_id)');
-  final VerificationMeta _dateMeta = const VerificationMeta('date');
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
   late final GeneratedColumn<String> date = GeneratedColumn<String>(
       'date', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [uniqueId, objectId, insideId, date];
+  List<GeneratedColumn> get $columns => [uniqueId, title, description, date];
   @override
-  String get aliasedName => _alias ?? 'db_location';
+  String get aliasedName => _alias ?? actualTableName;
   @override
-  String get actualTableName => 'db_location';
+  String get actualTableName => $name;
+  static const String $name = 'db_place';
   @override
-  VerificationContext validateIntegrity(Insertable<DbLocationData> instance,
+  VerificationContext validateIntegrity(Insertable<DbPlaceData> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -898,13 +1040,17 @@ class $DbLocationTable extends DbLocation
     } else if (isInserting) {
       context.missing(_uniqueIdMeta);
     }
-    if (data.containsKey('object_id')) {
-      context.handle(_objectIdMeta,
-          objectId.isAcceptableOrUnknown(data['object_id']!, _objectIdMeta));
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    } else if (isInserting) {
+      context.missing(_titleMeta);
     }
-    if (data.containsKey('inside_id')) {
-      context.handle(_insideIdMeta,
-          insideId.isAcceptableOrUnknown(data['inside_id']!, _insideIdMeta));
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
     }
     if (data.containsKey('date')) {
       context.handle(
@@ -918,23 +1064,23 @@ class $DbLocationTable extends DbLocation
   @override
   Set<GeneratedColumn> get $primaryKey => {uniqueId};
   @override
-  DbLocationData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  DbPlaceData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return DbLocationData(
-      uniqueId: attachedDatabase.options.types
+    return DbPlaceData(
+      uniqueId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}unique_id'])!,
-      objectId: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}object_id']),
-      insideId: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}inside_id']),
-      date: attachedDatabase.options.types
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description']),
+      date: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}date'])!,
     );
   }
 
   @override
-  $DbLocationTable createAlias(String alias) {
-    return $DbLocationTable(attachedDatabase, alias);
+  $DbPlaceTable createAlias(String alias) {
+    return $DbPlaceTable(attachedDatabase, alias);
   }
 }
 
@@ -1031,17 +1177,20 @@ class DbPlaceCompanion extends UpdateCompanion<DbPlaceData> {
   final Value<String> title;
   final Value<String?> description;
   final Value<String> date;
+  final Value<int> rowid;
   const DbPlaceCompanion({
     this.uniqueId = const Value.absent(),
     this.title = const Value.absent(),
     this.description = const Value.absent(),
     this.date = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
   DbPlaceCompanion.insert({
     required String uniqueId,
     required String title,
     this.description = const Value.absent(),
     required String date,
+    this.rowid = const Value.absent(),
   })  : uniqueId = Value(uniqueId),
         title = Value(title),
         date = Value(date);
@@ -1050,12 +1199,14 @@ class DbPlaceCompanion extends UpdateCompanion<DbPlaceData> {
     Expression<String>? title,
     Expression<String>? description,
     Expression<String>? date,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (uniqueId != null) 'unique_id': uniqueId,
       if (title != null) 'title': title,
       if (description != null) 'description': description,
       if (date != null) 'date': date,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
@@ -1063,12 +1214,14 @@ class DbPlaceCompanion extends UpdateCompanion<DbPlaceData> {
       {Value<String>? uniqueId,
       Value<String>? title,
       Value<String?>? description,
-      Value<String>? date}) {
+      Value<String>? date,
+      Value<int>? rowid}) {
     return DbPlaceCompanion(
       uniqueId: uniqueId ?? this.uniqueId,
       title: title ?? this.title,
       description: description ?? this.description,
       date: date ?? this.date,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -1087,6 +1240,9 @@ class DbPlaceCompanion extends UpdateCompanion<DbPlaceData> {
     if (date.present) {
       map['date'] = Variable<String>(date.value);
     }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
@@ -1096,98 +1252,10 @@ class DbPlaceCompanion extends UpdateCompanion<DbPlaceData> {
           ..write('uniqueId: $uniqueId, ')
           ..write('title: $title, ')
           ..write('description: $description, ')
-          ..write('date: $date')
+          ..write('date: $date, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
-  }
-}
-
-class $DbPlaceTable extends DbPlace with TableInfo<$DbPlaceTable, DbPlaceData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $DbPlaceTable(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _uniqueIdMeta = const VerificationMeta('uniqueId');
-  @override
-  late final GeneratedColumn<String> uniqueId = GeneratedColumn<String>(
-      'unique_id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: true,
-      defaultConstraints: 'REFERENCES db_index (unique_id)');
-  final VerificationMeta _titleMeta = const VerificationMeta('title');
-  @override
-  late final GeneratedColumn<String> title = GeneratedColumn<String>(
-      'title', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
-  @override
-  late final GeneratedColumn<String> description = GeneratedColumn<String>(
-      'description', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  final VerificationMeta _dateMeta = const VerificationMeta('date');
-  @override
-  late final GeneratedColumn<String> date = GeneratedColumn<String>(
-      'date', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  @override
-  List<GeneratedColumn> get $columns => [uniqueId, title, description, date];
-  @override
-  String get aliasedName => _alias ?? 'db_place';
-  @override
-  String get actualTableName => 'db_place';
-  @override
-  VerificationContext validateIntegrity(Insertable<DbPlaceData> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('unique_id')) {
-      context.handle(_uniqueIdMeta,
-          uniqueId.isAcceptableOrUnknown(data['unique_id']!, _uniqueIdMeta));
-    } else if (isInserting) {
-      context.missing(_uniqueIdMeta);
-    }
-    if (data.containsKey('title')) {
-      context.handle(
-          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
-    } else if (isInserting) {
-      context.missing(_titleMeta);
-    }
-    if (data.containsKey('description')) {
-      context.handle(
-          _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
-    }
-    if (data.containsKey('date')) {
-      context.handle(
-          _dateMeta, date.isAcceptableOrUnknown(data['date']!, _dateMeta));
-    } else if (isInserting) {
-      context.missing(_dateMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {uniqueId};
-  @override
-  DbPlaceData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return DbPlaceData(
-      uniqueId: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}unique_id'])!,
-      title: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
-      description: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}description']),
-      date: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}date'])!,
-    );
-  }
-
-  @override
-  $DbPlaceTable createAlias(String alias) {
-    return $DbPlaceTable(attachedDatabase, alias);
   }
 }
 
@@ -1199,7 +1267,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DbLocationTable dbLocation = $DbLocationTable(this);
   late final $DbPlaceTable dbPlace = $DbPlaceTable(this);
   @override
-  Iterable<TableInfo<Table, dynamic>> get allTables =>
+  Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
