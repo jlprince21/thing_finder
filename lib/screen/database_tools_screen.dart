@@ -94,33 +94,40 @@ class DatabaseToolsScreen extends StatelessWidget {
             },
           ),
 
-          // ListTile(
-          //   title: const Text('Import Containers to DB'),
-          //   onTap: () {
-          //     _pickFile("container");
-          //   },
-          // ),
+          ListTile(
+            title: const Text('Import Containers to DB'),
+            onTap: () {
+              _pickFile("container");
+            },
+          ),
 
-          // ListTile(
-          //   title: const Text('Import Indexes to DB'),
-          //   onTap: () {
-          //     _pickFile("index");
-          //   },
-          // ),
+          ListTile(
+            title: const Text('Import Indexes to DB'),
+            onTap: () {
+              _pickFile("index");
+            },
+          ),
 
-          // ListTile(
-          //   title: const Text('Import Items to DB'),
-          //   onTap: () {
-          //     _pickFile("item");
-          //   },
-          // ),
+          ListTile(
+            title: const Text('Import Items to DB'),
+            onTap: () {
+              _pickFile("item");
+            },
+          ),
 
-          // ListTile(
-          //   title: const Text('Import Locations to DB'),
-          //   onTap: () {
-          //     _pickFile("location");
-          //   },
-          // ),
+          ListTile(
+            title: const Text('Import Locations to DB'),
+            onTap: () {
+              _pickFile("location");
+            },
+          ),
+
+          ListTile(
+            title: const Text('Import Places to DB'),
+            onTap: () {
+              _pickFile("place");
+            },
+          ),
         ],
       ),
     );
@@ -330,6 +337,28 @@ class DatabaseToolsScreen extends StatelessWidget {
     ));
   }
 
+  _createPlace(String line) {
+    // TODO using a CSV parser may make this easier
+    final split = line.split('|');
+    final Map<int, String> values = {
+      for (int i = 0; i < split.length; i++)
+        i: split[i]
+    };
+    print(values);
+
+    final placeId = values[0];
+    final placeTitle = values[1];
+    final placeDescription = values[2];
+    final placeDate = values[3];
+
+    appDatabase.importPlace(DbPlaceCompanion(
+      uniqueId: dr.Value(placeId!),
+      title: dr.Value(placeTitle!),
+      description: placeDescription == null ? const dr.Value(null) : dr.Value(placeDescription),
+      date: dr.Value(placeDate!),
+    ));
+  }
+
   _createLocation(String line) {
     // TODO using a CSV parser may make this easier
     final split = line.split('|');
@@ -391,6 +420,14 @@ class DatabaseToolsScreen extends StatelessWidget {
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .forEach((l) => _createIndex(l));
+      }
+      else if (importType == "place")
+      {
+        File(file.path)
+          .openRead()
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())
+          .forEach((l) => _createPlace(l));
       }
 
     } else {
